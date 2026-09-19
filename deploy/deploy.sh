@@ -37,11 +37,21 @@ pm2 restart tradefx-api --update-env
 pm2 save --force >/dev/null
 
 echo "==> nginx"
-cp "$APP/deploy/nginx/tradefx.in.conf" /etc/nginx/sites-available/tradefx.in
-# Certbot rewrites the live file when HTTPS is on; do not clobber its 443 block.
-if grep -q "listen 443" /etc/nginx/sites-enabled/tradefx.in 2>/dev/null; then
-  echo "    (443 block present — leaving certbot's config in place)"
-  git checkout -- deploy/nginx/tradefx.in.conf 2>/dev/null || true
+# The shared header snippet is always refreshed — both the bootstrap config
+# and certbot's rewritten one include it by path.
+mkdir -p /etc/nginx/snippets
+cp "$APP/deploy/nginx/tradefx-security-headers.conf" /etc/nginx/snippets/tradefx-security-headers.conf
+
+# The site file is only installed while certbot has NOT taken it over. Once a
+# certificate is issued, certbot owns this file: copying the HTTP-only
+# bootstrap over it would delete the 443 block and take the site off HTTPS.
+# (The check must come before any copy — testing afterwards is useless.)
+if grep -q "listen 443" /etc/nginx/sites-available/tradefx.in 2>/dev/null; then
+  echo "    site is certbot-managed — leaving it untouched"
+else
+  cp "$APP/deploy/nginx/tradefx.in.conf" /etc/nginx/sites-available/tradefx.in
+  ln -sfn /etc/nginx/sites-available/tradefx.in /etc/nginx/sites-enabled/tradefx.in
+  echo "    installed bootstrap site config"
 fi
 if nginx -t >/dev/null 2>&1; then
   systemctl reload nginx
