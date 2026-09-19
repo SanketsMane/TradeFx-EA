@@ -7,6 +7,10 @@
  * admin-managed catalogue lands, swap `products`/`services` for a fetch and
  * keep these as the fallback.
  *
+ * Asset paths live under /product-images, not /products: the latter is a
+ * client-side route, and a real directory of that name makes nginx 301 to
+ * the folder instead of handing the request to the SPA.
+ *
  * Two rules this file exists to enforce:
  *  1. No prices. Everything is quote-on-request; an admin sends the figure.
  *  2. The word "copy" never appears in customer-facing copy — these are Expert
@@ -84,8 +88,8 @@ export const products: Product[] = [
     strategy: 'Intraday scalping',
     markets: 'XAUUSD · FX majors',
     accent: { chip: 'bg-amber-50 text-amber-800 ring-amber-200', glow: 'from-amber-200/40' },
-    image: '/products/scalper.webp',
-    cardImage: '/products/scalper-card.webp',
+    image: '/product-images/scalper.webp',
+    cardImage: '/product-images/scalper-card.webp',
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
@@ -134,8 +138,8 @@ export const products: Product[] = [
     strategy: 'Multi-asset trend and momentum',
     markets: 'FX · Metals · Indices',
     accent: { chip: 'bg-orange-50 text-orange-800 ring-orange-200', glow: 'from-orange-200/40' },
-    image: '/products/infinity.webp',
-    cardImage: '/products/infinity-card.webp',
+    image: '/product-images/infinity.webp',
+    cardImage: '/product-images/infinity-card.webp',
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
@@ -184,8 +188,8 @@ export const products: Product[] = [
     strategy: 'Position trading and compounding',
     markets: 'FX majors · Metals',
     accent: { chip: 'bg-yellow-50 text-yellow-800 ring-yellow-200', glow: 'from-yellow-200/40' },
-    image: '/products/investor.webp',
-    cardImage: '/products/investor-card.webp',
+    image: '/product-images/investor.webp',
+    cardImage: '/product-images/investor-card.webp',
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
@@ -234,8 +238,8 @@ export const products: Product[] = [
     strategy: 'Two-sided hedging',
     markets: 'FX majors · XAUUSD',
     accent: { chip: 'bg-amber-50 text-amber-900 ring-amber-300', glow: 'from-amber-300/40' },
-    image: '/products/heddge.webp',
-    cardImage: '/products/heddge-card.webp',
+    image: '/product-images/heddge.webp',
+    cardImage: '/product-images/heddge-card.webp',
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
