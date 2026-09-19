@@ -116,7 +116,7 @@ export default function HowItWorksPage() {
               </div>
               <div className="pt-1.5">
                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                  Step {i + 1}
+                  {`Step ${i + 1}`}
                 </span>
                 <h2 className="mt-1 text-lg font-bold text-gray-900">{s.title}</h2>
                 <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-gray-600">{s.body}</p>

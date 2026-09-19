@@ -86,9 +86,12 @@ export default function QuotePage() {
             Request received
           </h1>
           <p className="mt-3 text-gray-600">
-            Your reference is{' '}
-            <span className="font-mono font-semibold text-gray-900">{reference}</span>. An advisor
-            will review it and send you a price by email, normally within one business day.
+            <span>Your reference is </span>
+            <span className="font-mono font-semibold text-gray-900">{reference}</span>
+            <span>
+              . An advisor will review it and send you a price by email, normally within one
+              business day.
+            </span>
           </p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link

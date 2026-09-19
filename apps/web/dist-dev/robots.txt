@@ -1,0 +1,11 @@
+# TradeFx — https://tradefx.in
+User-agent: *
+Allow: /
+
+# Private areas. Nothing here is useful in an index, and both require a login.
+Disallow: /app
+Disallow: /dashboard
+Disallow: /reset-password
+Disallow: /forgot-password
+
+Sitemap: https://tradefx.in/sitemap.xml

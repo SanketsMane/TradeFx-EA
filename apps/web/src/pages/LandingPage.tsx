@@ -61,7 +61,7 @@ export default function LandingPage() {
             </div>
 
             <h1 className="reveal mt-5 text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl" style={{ "--reveal-delay": "90ms" } as CSSProperties}>
-              Your strategy,{' '}
+              <span>Your strategy, </span>
               <span className="bg-gradient-to-r from-brand-600 to-amber-500 bg-clip-text text-transparent">
                 running without you
               </span>

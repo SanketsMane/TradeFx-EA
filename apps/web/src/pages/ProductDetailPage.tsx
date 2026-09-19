@@ -294,11 +294,11 @@ export default function ProductDetailPage() {
                   </div>
                 ))}
                 <p className="pt-2 text-sm text-gray-500">
-                  More general questions are answered on{' '}
+                  <span>More general questions are answered on </span>
                   <Link to="/how-it-works" className="font-semibold text-brand-700 hover:underline">
                     How it works
                   </Link>
-                  .
+                  <span>.</span>
                 </p>
               </dl>
             )}

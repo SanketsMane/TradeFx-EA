@@ -153,7 +153,7 @@ export default function LoginPage() {
       </button>
 
       <p className="mt-6 text-[14px] text-[#8a8a8e]">
-        New user?{' '}
+        <span>New user? </span>
         <Link
           to="/register"
           className="font-semibold text-[#131316] underline decoration-[#bcbcc0] underline-offset-4"

@@ -154,11 +154,11 @@ export default function RegisterPage() {
             className="mt-px h-4 w-4 shrink-0 accent-brand-600"
           />
           <span>
-            I agree to the{' '}
+            <span>I agree to the </span>
             <span className="text-[#131316] underline decoration-[#bcbcc0] underline-offset-2">
               Terms of Service
-            </span>{' '}
-            and{' '}
+            </span>
+            <span> and </span>
             <span className="text-[#131316] underline decoration-[#bcbcc0] underline-offset-2">
               Privacy Policy
             </span>
@@ -207,7 +207,7 @@ export default function RegisterPage() {
       </button>
 
       <p className="mt-6 text-[14px] text-[#8a8a8e]">
-        Already registered?{' '}
+        <span>Already registered? </span>
         <Link
           to="/login"
           className="font-semibold text-[#131316] underline decoration-[#bcbcc0] underline-offset-4"

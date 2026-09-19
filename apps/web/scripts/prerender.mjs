@@ -59,14 +59,22 @@ const MIME = {
   '.xml': 'application/xml',
 };
 
-/** Static server with an SPA fallback, so client routing works while capturing. */
+/**
+ * While capturing, always serve the untouched SPA shell. During the
+ * verification pass, serve the snapshots instead so we exercise exactly
+ * what production will send.
+ */
+let serveSnapshots = false;
+
 function serve() {
   return new Promise((ready) => {
     const server = createServer(async (req, res) => {
       const url = decodeURIComponent((req.url || '/').split('?')[0]);
-      const candidate = join(DIST, url);
-      let file = null;
-      if (extname(url) && existsSync(candidate)) file = candidate;
+      const direct = join(DIST, url);
+      const asRoute = join(DIST, url, 'index.html');
+      let file;
+      if (extname(url) && existsSync(direct)) file = direct;
+      else if (serveSnapshots && existsSync(asRoute)) file = asRoute;
       else file = join(DIST, 'index.html');
       try {
         const body = await readFile(file);
@@ -136,6 +144,35 @@ for (const route of ROUTES) {
 }
 
 await context.close();
+/*
+ * Load every snapshot back and confirm React hydrates it.
+ *
+ * A hydration mismatch makes React discard the prerendered DOM and rebuild
+ * the page, which costs a second paint of the largest element and a layout
+ * shift — undoing most of what prerendering is for. It is silent in
+ * production, so it is checked here instead.
+ */
+serveSnapshots = true;
+const verifier = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+const vp = await verifier.newPage();
+const hydrationErrors = new Map();
+vp.on('pageerror', (e) => {
+  const m = String(e).match(/invariant=(418|423|425)/);
+  if (m || /Hydration failed|did not match/i.test(String(e))) {
+    hydrationErrors.set(vp.url(), (m ? `React #${m[1]}` : String(e).slice(0, 80)));
+  }
+});
+
+for (const route of ROUTES) {
+  await vp.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: 'networkidle', timeout: 45000 });
+  await vp.waitForTimeout(600);
+}
+for (const [url, err] of hydrationErrors) {
+  const route = new URL(url).pathname;
+  problems.push(`${route}: hydration failed (${err}) — React rebuilt the page`);
+}
+await verifier.close();
+
 await browser.close();
 server.close();
 

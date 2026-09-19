@@ -48,7 +48,6 @@ const TradingAccountsPage = lazy(() => import('./pages/portal/TradingAccountsPag
 const BrokerAccountPage = lazy(() => import('./pages/portal/BrokerAccountPage'));
 const MyQuotesPage = lazy(() => import('./pages/portal/MyQuotesPage'));
 
-
 function RequireAuth({ children }: { children: ReactElement }) {
   return isAuthenticated() ? children : <Navigate to="/login" replace />;
 }
@@ -64,7 +63,15 @@ function RequireSuperAdmin({ children }: { children: ReactElement }) {
   return getUser()?.role === 'SUPER_ADMIN' ? children : <Navigate to="/dashboard" replace />;
 }
 
-/** Shown while a lazily-loaded private route downloads. */
+/**
+ * Shown while a lazily-loaded private route downloads.
+ *
+ * The boundary wraps only the private trees, never the whole router. React
+ * hydrates a Suspense boundary by looking for the comment markers a server
+ * renderer emits, and our prerendered snapshots come from a browser, which
+ * emits none — a boundary anywhere in a public page's tree made hydration
+ * fail and threw the entire document away.
+ */
 function RouteFallback() {
   return (
     <div className="grid min-h-screen place-content-center bg-slate-50">
@@ -78,9 +85,8 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <Analytics />
-      <Suspense fallback={<RouteFallback />}>
-        <Routes>
-        {/* ---- Public marketing site ---- */}
+      <Routes>
+        {/* ---- Public marketing site (prerendered, hydrated) ---- */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/products/compare" element={<CompareProductsPage />} />
@@ -94,12 +100,15 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+
         {/* ---- Customer portal ---- */}
         <Route
           path="/app"
           element={
             <RequireAuth>
-              <PortalLayout />
+              <Suspense fallback={<RouteFallback />}>
+                <PortalLayout />
+              </Suspense>
             </RequireAuth>
           }
         >
@@ -117,7 +126,9 @@ export default function App() {
           path="/dashboard"
           element={
             <RequireStaff>
-              <DashboardLayout />
+              <Suspense fallback={<RouteFallback />}>
+                <DashboardLayout />
+              </Suspense>
             </RequireStaff>
           }
         >
@@ -163,9 +174,9 @@ export default function App() {
           {/* Unknown dashboard path → 404 inside the shell, not a bounce to marketing. */}
           <Route path="*" element={<NotFoundPage />} />
         </Route>
+
         <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Suspense>
+      </Routes>
     </BrowserRouter>
   );
 }

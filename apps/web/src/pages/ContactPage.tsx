@@ -84,7 +84,8 @@ export default function ContactPage() {
                 <h2 className="mt-4 font-semibold text-gray-900">{c.title}</h2>
                 <p className="mt-1.5 flex-1 text-sm leading-relaxed text-gray-600">{c.body}</p>
                 <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
-                  {c.action} <ArrowRight className="h-4 w-4" />
+                  <span>{c.action}</span>
+                  <ArrowRight className="h-4 w-4" />
                 </span>
               </>
             );

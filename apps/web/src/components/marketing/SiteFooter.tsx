@@ -94,7 +94,7 @@ export default function SiteFooter() {
             software and infrastructure; we do not provide investment advice or manage client
             funds.
           </p>
-          <p className="mt-4 text-xs text-gray-500">© {year} TradeFx. All rights reserved.</p>
+          <p className="mt-4 text-xs text-gray-500">{`© ${year} TradeFx. All rights reserved.`}</p>
         </div>
       </div>
 
