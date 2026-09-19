@@ -82,7 +82,17 @@ function serve() {
 
 const server = await serve();
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+/*
+ * Reduced motion is emulated so scroll-reveal animations render their
+ * content immediately. Without it the homepage snapshots as one word: the
+ * reveal wrappers sit at opacity 0 waiting for a scroll that never happens
+ * in a headless capture.
+ */
+const context = await browser.newContext({
+  viewport: { width: 1280, height: 900 },
+  reducedMotion: 'reduce',
+});
+const page = await context.newPage();
 
 let written = 0;
 const problems = [];
@@ -116,6 +126,7 @@ for (const route of ROUTES) {
   console.log(`  ${route.padEnd(22)} ${String(words).padStart(4)} words  h1=${h1}  ${title.slice(0, 44)}`);
 }
 
+await context.close();
 await browser.close();
 server.close();
 
