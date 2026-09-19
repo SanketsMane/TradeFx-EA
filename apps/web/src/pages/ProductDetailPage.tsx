@@ -116,10 +116,14 @@ export default function ProductDetailPage() {
                 )}
               />
               <img
-                src={product.image}
+                src={product.cardImage}
+                srcSet={`${product.smallImage} 240w, ${product.cardImage} 440w, ${product.image} 900w`}
+                /* Caps out at 340px on screen, so a 900w asset is only ever
+                   needed on a high-density display. */
+                sizes="(max-width: 639px) 300px, 340px"
                 alt={`${product.name} Expert Advisor`}
-                width={product.imageSize.w}
-                height={product.imageSize.h}
+                width={product.cardSize.w}
+                height={product.cardSize.h}
                 /* LCP element on this page — fetched eagerly at high priority. */
                 fetchPriority="high"
                 className="relative h-auto w-full max-w-[340px] object-contain drop-shadow-2xl"
