@@ -53,27 +53,27 @@ export default function LandingPage() {
 
         <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 sm:pt-24">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="reveal" style={{ "--reveal-delay": "0ms" } as CSSProperties}>
+            <div className="">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-brand-700 ring-1 ring-brand-100">
                 <Gauge className="h-3.5 w-3.5" />
                 Forex Expert Advisors
               </span>
             </div>
 
-            <h1 className="reveal mt-5 text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl" style={{ "--reveal-delay": "90ms" } as CSSProperties}>
+            <h1 className="mt-5 text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl">
               <span>Your strategy, </span>
               <span className="bg-gradient-to-r from-brand-600 to-amber-500 bg-clip-text text-transparent">
                 running without you
               </span>
             </h1>
 
-            <p className="reveal mx-auto mt-5 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg" style={{ "--reveal-delay": "180ms" } as CSSProperties}>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
               Four Expert Advisors for MetaTrader — scalping, multi-asset, long-term and hedged.
               Link your own broker account, enter a licence code, and let the bot trade while you
               get on with your day.
             </p>
 
-            <div className="reveal mt-8 flex flex-wrap justify-center gap-3" style={{ "--reveal-delay": "270ms" } as CSSProperties}>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link to="/products"
                 className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700">
                 Explore Expert Advisors <ArrowRight className="h-4 w-4" />

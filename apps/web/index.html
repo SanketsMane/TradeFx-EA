@@ -27,11 +27,10 @@
     <meta property="og:image" content="https://tradefx.in/logo.png" />
     <meta name="twitter:card" content="summary" />
 
-    <!-- Google Analytics 4. The init lives in /analytics.js, not inline:
-         the CSP forbids inline scripts, so an inline block would be
-         blocked and record nothing. -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0JWB9R1688"></script>
-    <script src="/analytics.js"></script>
+    <!-- Google Analytics 4. /analytics.js injects gtag.js once the browser
+         is idle: at ~512 kB it is larger than the app itself and must not
+         compete for the main thread during first paint. -->
+    <script defer src="/analytics.js"></script>
   </head>
   <body>
     <div id="root"></div>
