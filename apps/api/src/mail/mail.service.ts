@@ -5,7 +5,16 @@ import { createTransport, type Transporter } from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
 import { SettingsService, SmtpConfig } from '../settings/settings.service';
 import { ResendService } from './resend.service';
-import { copyAlertEmail, inviteEmail, passwordResetLinkEmail, resetEmail } from './templates';
+import {
+  executionAlertEmail,
+  inviteEmail,
+  licenseIssuedEmail,
+  passwordResetLinkEmail,
+  quoteAnsweredEmail,
+  quoteReceivedEmail,
+  resetEmail,
+  welcomeEmail,
+} from './templates';
 
 export interface MailInput {
   to: string;
@@ -19,7 +28,7 @@ export interface MailResult {
   message: string;
 }
 
-/** Details for a failed-copy alert email. */
+/** Details for a failed-execution alert email. */
 export interface CopyAlertInput {
   receiverAccountId: string;
   sourceAccountId: string;
@@ -207,7 +216,45 @@ export class MailService {
     return this.send({ to: email, subject, html, text });
   }
 
-  /** Recipients for copy alerts: configured alertEmail, else all active super-admins. */
+  /** Sent after self-service sign-up. */
+  async sendWelcome(email: string, name: string): Promise<MailResult> {
+    const { subject, html, text } = welcomeEmail({ name, url: this.appUrl() });
+    return this.send({ to: email, subject, html, text });
+  }
+
+  /** Delivers a licence code to the customer who bought it. */
+  async sendLicenseIssued(
+    email: string,
+    p: { productName: string; code: string; expiresAt?: Date | null },
+  ): Promise<MailResult> {
+    const { subject, html, text } = licenseIssuedEmail({
+      productName: p.productName,
+      code: p.code,
+      expiresAt: p.expiresAt ? p.expiresAt.toISOString().slice(0, 10) : null,
+      url: this.appUrl(),
+    });
+    return this.send({ to: email, subject, html, text });
+  }
+
+  /** Acknowledges a quotation request. Carries no price — there is none yet. */
+  async sendQuoteReceived(
+    email: string,
+    p: { name: string; reference: string; subjectLine: string },
+  ): Promise<MailResult> {
+    const { subject, html, text } = quoteReceivedEmail({ ...p, url: this.appUrl() });
+    return this.send({ to: email, subject, html, text });
+  }
+
+  /** Sends the advisor's written reply to a quotation request. */
+  async sendQuoteAnswered(
+    email: string,
+    p: { name: string; reference: string; subjectLine: string; note: string },
+  ): Promise<MailResult> {
+    const { subject, html, text } = quoteAnsweredEmail({ ...p, url: this.appUrl() });
+    return this.send({ to: email, subject, html, text });
+  }
+
+  /** Recipients for execution alerts: configured alertEmail, else all active super-admins. */
   private async alertRecipients(): Promise<string[]> {
     const configured = this.configuredAlertEmail();
     if (configured) return [configured];
@@ -219,7 +266,7 @@ export class MailService {
   }
 
   /**
-   * Fire-and-forget alert on a failed copy. Skips when email/alerts are off, and
+   * Fire-and-forget alert on a failed execution. Skips when email/alerts are off, and
    * throttles per receiver+symbol so a broker outage can't flood the inbox.
    */
   async sendCopyAlert(evt: CopyAlertInput): Promise<void> {
@@ -247,7 +294,7 @@ export class MailService {
       const receiver = label(evt.receiverAccountId);
       const order = `${evt.side} ${evt.lots} ${evt.symbol} (${evt.action})`;
 
-      const { subject, html, text } = copyAlertEmail({
+      const { subject, html, text } = executionAlertEmail({
         order,
         master: source,
         slave: receiver,
@@ -255,7 +302,7 @@ export class MailService {
       });
       await this.send({ to: recipients.join(', '), subject, html, text });
     } catch (e) {
-      this.logger.error('Failed to send copy alert: ' + errMsg(e));
+      this.logger.error('Failed to send execution alert: ' + errMsg(e));
     }
   }
 }

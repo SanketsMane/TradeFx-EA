@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { BotLicense, Prisma, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import { AuditService } from '../common/audit/audit.service';
 import { Actor } from '../common/scope';
 import { productName } from '../common/catalog';
@@ -26,13 +27,14 @@ export class LicensesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly mail: MailService,
   ) {}
 
   /** Issues a new licence code to a customer. Staff-only. */
   async issue(dto: IssueLicenseDto, actor: Actor) {
     const user = await this.prisma.user.findUnique({
       where: { id: dto.userId },
-      select: { id: true, role: true },
+      select: { id: true, role: true, email: true },
     });
     if (!user) throw new NotFoundException('User not found');
     if (user.role !== Role.CUSTOMER) {
@@ -52,6 +54,13 @@ export class LicensesService {
         select: LIST_VIEW,
       }),
     );
+
+    // The code is the product — deliver it immediately, best-effort.
+    void this.mail.sendLicenseIssued(user.email, {
+      productName: license.productName,
+      code: license.code,
+      expiresAt: license.expiresAt,
+    });
 
     await this.audit.log({
       userId: actor.sub,

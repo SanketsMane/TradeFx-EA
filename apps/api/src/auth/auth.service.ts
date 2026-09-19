@@ -101,6 +101,9 @@ export class AuthService {
       meta: { email },
     });
 
+    // Best-effort: a failed welcome email must not fail the sign-up.
+    void this.mail.sendWelcome(email, user.fullName ?? 'there');
+
     return { ...tokens, user: AuthService.toPublicUser(user) };
   }
 

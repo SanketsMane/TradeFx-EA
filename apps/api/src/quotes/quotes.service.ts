@@ -3,6 +3,8 @@ import { Prisma, QuoteRequest, QuoteStatus } from '@prisma/client';
 import { randomInt } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/audit/audit.service';
+import { MailService } from '../mail/mail.service';
+import { PRODUCTS, isProductSlug } from '../common/catalog';
 import { Actor } from '../common/scope';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
@@ -27,6 +29,7 @@ export class QuotesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly mail: MailService,
   ) {}
 
   /**
@@ -62,6 +65,12 @@ export class QuotesService {
         select: { id: true, reference: true },
       }),
     );
+
+    void this.mail.sendQuoteReceived(email, {
+      name: dto.name.trim(),
+      reference: created.reference,
+      subjectLine: QuotesService.subjectLine(dto.productSlug, dto.serviceSlug),
+    });
 
     await this.audit.log({
       userId: user?.id,
@@ -107,6 +116,17 @@ export class QuotesService {
       },
     });
 
+    // Only mail the customer when an advisor actually wrote a reply —
+    // a bare status change is internal bookkeeping, not news for them.
+    if (answering && updated.quotedNote) {
+      void this.mail.sendQuoteAnswered(updated.email, {
+        name: updated.name,
+        reference: updated.reference,
+        subjectLine: QuotesService.subjectLine(updated.productSlug, updated.serviceSlug),
+        note: updated.quotedNote,
+      });
+    }
+
     await this.audit.log({
       userId: actor.sub,
       action: 'QUOTE_UPDATED',
@@ -116,6 +136,21 @@ export class QuotesService {
     });
 
     return updated;
+  }
+
+  /** Human description of what a request was about, for email subjects. */
+  private static subjectLine(
+    productSlug?: string | null,
+    serviceSlug?: string | null,
+  ): string {
+    if (productSlug && isProductSlug(productSlug)) return PRODUCTS[productSlug];
+    if (serviceSlug) {
+      return serviceSlug
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+    }
+    return 'General enquiry';
   }
 
   /**
