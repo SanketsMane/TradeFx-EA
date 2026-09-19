@@ -59,6 +59,8 @@ export interface Product {
   accent: { chip: string; glow: string };
   image: string;
   cardImage: string;
+  /** ~240px wide variant, for phone-sized slots. */
+  smallImage: string;
   /** Intrinsic size of cardImage — lets the browser reserve space (CLS). */
   cardSize: { w: number; h: number };
   /** Intrinsic size of image. */
@@ -103,6 +105,7 @@ export const products: Product[] = [
     accent: { chip: 'bg-amber-50 text-amber-800 ring-amber-200', glow: 'from-amber-200/40' },
     image: '/product-images/scalper.webp',
     cardImage: '/product-images/scalper-card.webp',
+    smallImage: '/product-images/scalper-sm.webp',
     cardSize: { w: 440, h: 689 },
     imageSize: { w: 900, h: 1410 },
     compare: {
@@ -162,6 +165,7 @@ export const products: Product[] = [
     accent: { chip: 'bg-orange-50 text-orange-800 ring-orange-200', glow: 'from-orange-200/40' },
     image: '/product-images/infinity.webp',
     cardImage: '/product-images/infinity-card.webp',
+    smallImage: '/product-images/infinity-sm.webp',
     cardSize: { w: 440, h: 668 },
     imageSize: { w: 900, h: 1366 },
     compare: {
@@ -221,6 +225,7 @@ export const products: Product[] = [
     accent: { chip: 'bg-yellow-50 text-yellow-800 ring-yellow-200', glow: 'from-yellow-200/40' },
     image: '/product-images/investor.webp',
     cardImage: '/product-images/investor-card.webp',
+    smallImage: '/product-images/investor-sm.webp',
     cardSize: { w: 440, h: 665 },
     imageSize: { w: 900, h: 1360 },
     compare: {
@@ -280,6 +285,7 @@ export const products: Product[] = [
     accent: { chip: 'bg-amber-50 text-amber-900 ring-amber-300', glow: 'from-amber-300/40' },
     image: '/product-images/heddge.webp',
     cardImage: '/product-images/heddge-card.webp',
+    smallImage: '/product-images/heddge-sm.webp',
     cardSize: { w: 440, h: 652 },
     imageSize: { w: 900, h: 1333 },
     compare: {

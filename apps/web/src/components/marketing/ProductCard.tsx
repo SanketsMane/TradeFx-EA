@@ -26,6 +26,8 @@ export default function ProductCard({ product, className }: { product: Product; 
         />
         <img
           src={product.cardImage}
+          srcSet={`${product.smallImage} 240w, ${product.cardImage} 440w`}
+          sizes="(max-width: 639px) 200px, 280px"
           alt={`${product.name} Expert Advisor`}
           width={product.cardSize.w}
           height={product.cardSize.h}

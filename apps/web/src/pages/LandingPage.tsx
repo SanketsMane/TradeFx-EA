@@ -96,6 +96,8 @@ export default function LandingPage() {
                 <Link to={`/products/${p.slug}`} aria-label={p.name}>
                   <img
                     src={p.cardImage}
+                    srcSet={`${p.smallImage} 240w, ${p.cardImage} 440w`}
+                    sizes="(max-width: 639px) 90px, (max-width: 1023px) 140px, 175px"
                     alt={`${p.name} Expert Advisor`}
                     width={p.cardSize.w}
                     height={p.cardSize.h}
