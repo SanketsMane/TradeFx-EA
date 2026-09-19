@@ -5,7 +5,7 @@ import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
 import { products, services } from '@/lib/catalog';
 import { quotesApi } from '@/lib/api';
-import { usePageTitle } from '@/lib/usePageTitle';
+import { useSeo } from '@/lib/useSeo';
 
 const FIELD =
   'h-11 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-sm text-gray-900 outline-none transition-shadow placeholder:text-gray-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-100';
@@ -19,7 +19,12 @@ const ACCOUNT_SIZES = [
 ];
 
 export default function QuotePage() {
-  usePageTitle('Request a quotation');
+  useSeo({
+    title: 'Request a Quotation',
+    path: '/quote',
+    description:
+      'Tell us which Expert Advisor you want and a little about your account. We price per trading account, so an advisor replies with a figure — usually within one business day.',
+  });
   const [params] = useSearchParams();
 
   // Deep links from a product or service card pre-select the subject.

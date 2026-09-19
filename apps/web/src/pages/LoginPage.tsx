@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '@/components/auth/AuthShell';
+import { useSeo } from '@/lib/useSeo';
 import AuthTabs, { type AuthMode } from '@/components/auth/AuthTabs';
 import PhoneOtpForm from '@/components/auth/PhoneOtpForm';
 import { login } from '@/lib/api';
@@ -24,6 +25,8 @@ const FIELD =
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  useSeo({ title: 'Sign in', path: '/login', noindex: true });
+
   const [mode, setMode] = useState<AuthMode>('email');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [email, setEmail] = useState('');

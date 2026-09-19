@@ -4,7 +4,8 @@ import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
 import ProductCard from '@/components/marketing/ProductCard';
 import { products } from '@/lib/catalog';
-import { usePageTitle } from '@/lib/usePageTitle';
+import { useSeo } from '@/lib/useSeo';
+import { breadcrumbSchema, itemListSchema } from '@/lib/seo';
 
 const included = [
   { icon: KeyRound, title: 'A licence code', desc: 'Nine characters, issued the moment your purchase is confirmed.' },
@@ -13,7 +14,19 @@ const included = [
 ];
 
 export default function ProductsPage() {
-  usePageTitle('Expert Advisors');
+  useSeo({
+    title: 'Forex Expert Advisors for MT4 and MT5',
+    path: '/products',
+    description:
+      'Compare the four TradeFx Expert Advisors — Scalper for gold, Infinity for multi-asset, Investor for the long term and Heddge for two-sided hedging. Managed execution, no VPS required.',
+    jsonLd: [
+      itemListSchema(products.map((p) => ({ name: p.name, path: `/products/${p.slug}` }))),
+      breadcrumbSchema([
+        { name: 'Home', path: '/' },
+        { name: 'Expert Advisors', path: '/products' },
+      ]),
+    ],
+  });
 
   return (
     <div className="min-h-screen bg-white">

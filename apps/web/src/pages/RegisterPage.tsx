@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '@/components/auth/AuthShell';
+import { useSeo } from '@/lib/useSeo';
 import AuthTabs, { type AuthMode } from '@/components/auth/AuthTabs';
 import PhoneOtpForm from '@/components/auth/PhoneOtpForm';
 import { register } from '@/lib/api';
@@ -17,6 +18,8 @@ const FIELD =
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  useSeo({ title: 'Create an account', path: '/register', noindex: true });
+
   const [mode, setMode] = useState<AuthMode>('email');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);

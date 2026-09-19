@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Clock, Mail, MessageCircle, Send } from 'lucide-react';
 import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
-import { usePageTitle } from '@/lib/usePageTitle';
+import { useSeo } from '@/lib/useSeo';
+import { breadcrumbSchema } from '@/lib/seo';
 import { TELEGRAM_URL } from '@/lib/contact';
 
 /**
@@ -40,7 +41,16 @@ const channels = [
 ];
 
 export default function ContactPage() {
-  usePageTitle('Contact');
+  useSeo({
+    title: 'Contact TradeFx',
+    path: '/contact',
+    description:
+      'Questions about which Expert Advisor suits your account, whether your broker is supported, or a project you want built. Reach TradeFx by email or Telegram.',
+    jsonLd: breadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Contact', path: '/contact' },
+    ]),
+  });
 
   return (
     <div className="min-h-screen bg-white">

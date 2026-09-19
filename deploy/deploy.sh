@@ -21,6 +21,11 @@ echo "==> Installing"
 corepack enable >/dev/null 2>&1 || true
 pnpm install --frozen-lockfile --silent
 
+# The build prerenders each route in a headless browser. Downloading Chromium
+# is a no-op once it is cached, so this stays cheap on repeat deploys.
+echo "==> Ensuring the prerender browser is present"
+pnpm --filter @tcp/web exec playwright install chromium 2>&1 | tail -2
+
 echo "==> Migrating"
 pnpm --filter @tcp/api exec prisma migrate deploy 2>&1 | grep -viE "^$|prisma:|update available|npm i " || true
 

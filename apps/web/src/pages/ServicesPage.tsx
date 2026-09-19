@@ -3,10 +3,23 @@ import { ArrowRight, Check } from 'lucide-react';
 import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
 import { services } from '@/lib/catalog';
-import { usePageTitle } from '@/lib/usePageTitle';
+import { useSeo } from '@/lib/useSeo';
+import { breadcrumbSchema, serviceSchema } from '@/lib/seo';
 
 export default function ServicesPage() {
-  usePageTitle('Services');
+  useSeo({
+    title: 'Forex EA Development, Trading VPS and Custom Platforms',
+    path: '/services',
+    description:
+      'Expert Advisor development for MT4 and MT5, low-latency forex trading VPS, multi-account execution and crypto P2P platforms — built to order by TradeFx.',
+    jsonLd: [
+      ...services.map((s) => serviceSchema({ name: s.name, slug: s.slug, description: s.summary })),
+      breadcrumbSchema([
+        { name: 'Home', path: '/' },
+        { name: 'Services', path: '/services' },
+      ]),
+    ],
+  });
 
   return (
     <div className="min-h-screen bg-white">

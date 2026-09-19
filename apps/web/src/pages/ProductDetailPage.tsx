@@ -16,7 +16,8 @@ import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
 import ProductCard from '@/components/marketing/ProductCard';
 import { productBySlug, products } from '@/lib/catalog';
-import { usePageTitle } from '@/lib/usePageTitle';
+import { useSeo } from '@/lib/useSeo';
+import { breadcrumbSchema, faqSchema, productSchema } from '@/lib/seo';
 import { TELEGRAM_URL } from '@/lib/contact';
 import { cn } from '@/lib/utils';
 
@@ -41,7 +42,29 @@ export default function ProductDetailPage() {
   const product = productBySlug(slug);
   const [tab, setTab] = useState<Tab>('overview');
 
-  usePageTitle(product?.name);
+  useSeo({
+    title: product ? `${product.name} — ${product.tagline}` : 'Expert Advisor',
+    path: `/products/${slug ?? ''}`,
+    description: product?.summary,
+    image: product?.cardImage,
+    jsonLd: product
+      ? [
+          productSchema({
+            name: product.name,
+            slug: product.slug,
+            description: product.summary,
+            image: product.cardImage,
+            category: product.strategy,
+          }),
+          faqSchema(product.faqs),
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Expert Advisors', path: '/products' },
+            { name: product.name, path: `/products/${product.slug}` },
+          ]),
+        ]
+      : undefined,
+  });
 
   if (!product) return <Navigate to="/products" replace />;
 
@@ -95,8 +118,11 @@ export default function ProductDetailPage() {
               <img
                 src={product.image}
                 alt={`${product.name} Expert Advisor`}
-                width={420}
-                className="relative w-full max-w-[340px] object-contain drop-shadow-2xl"
+                width={product.imageSize.w}
+                height={product.imageSize.h}
+                /* LCP element on this page — fetched eagerly at high priority. */
+                fetchPriority="high"
+                className="relative h-auto w-full max-w-[340px] object-contain drop-shadow-2xl"
               />
             </div>
 

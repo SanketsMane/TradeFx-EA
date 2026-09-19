@@ -63,6 +63,8 @@ export default function SiteFooter() {
             </h3>
             <ul className="mt-3 space-y-2">
               {[
+                { to: '/products/compare', label: 'Compare Expert Advisors' },
+                { to: '/supported-brokers', label: 'Supported brokers' },
                 { to: '/how-it-works', label: 'How it works' },
                 { to: '/contact', label: 'Contact' },
                 { to: '/quote', label: 'Request a quote' },

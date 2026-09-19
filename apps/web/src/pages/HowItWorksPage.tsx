@@ -10,7 +10,8 @@ import {
 } from 'lucide-react';
 import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
-import { usePageTitle } from '@/lib/usePageTitle';
+import { useSeo } from '@/lib/useSeo';
+import { breadcrumbSchema, faqSchema } from '@/lib/seo';
 
 const steps = [
   {
@@ -73,7 +74,19 @@ const faqs = [
 ];
 
 export default function HowItWorksPage() {
-  usePageTitle('How it works');
+  useSeo({
+    title: 'How TradeFx Expert Advisors Work',
+    path: '/how-it-works',
+    description:
+      'From sign-up to your first automated trade in six steps. Keep your own broker account and funds; TradeFx supplies the Expert Advisor and runs it — no VPS to maintain.',
+    jsonLd: [
+      faqSchema(faqs),
+      breadcrumbSchema([
+        { name: 'Home', path: '/' },
+        { name: 'How it works', path: '/how-it-works' },
+      ]),
+    ],
+  });
 
   return (
     <div className="min-h-screen bg-white">

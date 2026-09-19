@@ -27,6 +27,8 @@ export default function ProductCard({ product, className }: { product: Product; 
         <img
           src={product.cardImage}
           alt={`${product.name} Expert Advisor`}
+          width={product.cardSize.w}
+          height={product.cardSize.h}
           loading="lazy"
           decoding="async"
           className="relative h-52 w-auto object-contain object-bottom drop-shadow-xl transition-transform duration-300 group-hover:scale-[1.03]"

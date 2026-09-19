@@ -17,7 +17,8 @@ import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
 import ProductCard from '@/components/marketing/ProductCard';
 import { products, services } from '@/lib/catalog';
-import { usePageTitle } from '@/lib/usePageTitle';
+import { useSeo } from '@/lib/useSeo';
+import { organizationSchema, websiteSchema, itemListSchema } from '@/lib/seo';
 
 const revealVariants: Variants = {
   visible: (i: number) => ({
@@ -43,7 +44,16 @@ const assurances = [
 ];
 
 export default function LandingPage() {
-  usePageTitle();
+  useSeo({
+    path: '/',
+    description:
+      'Four Expert Advisors for MetaTrader — scalping, multi-asset, long-term and hedged. Link your own MT4 or MT5 broker account, enter a licence code, and let the bot trade.',
+    jsonLd: [
+      organizationSchema(),
+      websiteSchema(),
+      itemListSchema(products.map((p) => ({ name: p.name, path: `/products/${p.slug}` }))),
+    ],
+  });
   const timelineRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -106,6 +116,10 @@ export default function LandingPage() {
                   <img
                     src={p.cardImage}
                     alt={`${p.name} Expert Advisor`}
+                    width={p.cardSize.w}
+                    height={p.cardSize.h}
+                    /* The hero line-up is the LCP candidate above the fold. */
+                    fetchPriority={i === 0 ? 'high' : 'auto'}
                     className="h-32 w-auto object-contain drop-shadow-xl sm:h-48 lg:h-60"
                   />
                 </Link>

@@ -31,13 +31,13 @@ if (productSlugs.length === 0) {
 const routes = [
   { path: '/', priority: '1.0', changefreq: 'weekly' },
   { path: '/products', priority: '0.9', changefreq: 'weekly' },
+  { path: '/products/compare', priority: '0.9', changefreq: 'monthly' },
   ...productSlugs.map((s) => ({ path: `/products/${s}`, priority: '0.8', changefreq: 'monthly' })),
   { path: '/services', priority: '0.8', changefreq: 'monthly' },
+  { path: '/supported-brokers', priority: '0.8', changefreq: 'monthly' },
   { path: '/how-it-works', priority: '0.7', changefreq: 'monthly' },
   { path: '/quote', priority: '0.7', changefreq: 'monthly' },
   { path: '/contact', priority: '0.6', changefreq: 'monthly' },
-  { path: '/register', priority: '0.5', changefreq: 'yearly' },
-  { path: '/login', priority: '0.3', changefreq: 'yearly' },
 ];
 
 const today = new Date().toISOString().slice(0, 10);

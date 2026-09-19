@@ -59,6 +59,19 @@ export interface Product {
   accent: { chip: string; glow: string };
   image: string;
   cardImage: string;
+  /** Intrinsic size of cardImage — lets the browser reserve space (CLS). */
+  cardSize: { w: number; h: number };
+  /** Intrinsic size of image. */
+  imageSize: { w: number; h: number };
+  /** Side-by-side comparison attributes. Qualitative on purpose — we do not
+   *  publish performance figures we have not verified. */
+  compare: {
+    risk: 'Higher' | 'Moderate' | 'Lower';
+    frequency: string;
+    horizon: string;
+    accountType: string;
+    bestFor: string;
+  };
   /** Line items on the "what you get" panel. */
   included: string[];
   /** What the customer needs before this will run. */
@@ -90,6 +103,15 @@ export const products: Product[] = [
     accent: { chip: 'bg-amber-50 text-amber-800 ring-amber-200', glow: 'from-amber-200/40' },
     image: '/product-images/scalper.webp',
     cardImage: '/product-images/scalper-card.webp',
+    cardSize: { w: 440, h: 689 },
+    imageSize: { w: 900, h: 1410 },
+    compare: {
+      risk: 'Higher',
+      frequency: 'Several trades a session',
+      horizon: 'Intraday',
+      accountType: 'Raw-spread / ECN, MT5',
+      bestFor: 'Traders who want activity and can sit through fast swings',
+    },
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
@@ -140,6 +162,15 @@ export const products: Product[] = [
     accent: { chip: 'bg-orange-50 text-orange-800 ring-orange-200', glow: 'from-orange-200/40' },
     image: '/product-images/infinity.webp',
     cardImage: '/product-images/infinity-card.webp',
+    cardSize: { w: 440, h: 668 },
+    imageSize: { w: 900, h: 1366 },
+    compare: {
+      risk: 'Moderate',
+      frequency: 'A few trades a day',
+      horizon: 'Days to weeks',
+      accountType: 'Standard MT4 or MT5',
+      bestFor: 'A first Expert Advisor, spread across many markets',
+    },
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
@@ -190,6 +221,15 @@ export const products: Product[] = [
     accent: { chip: 'bg-yellow-50 text-yellow-800 ring-yellow-200', glow: 'from-yellow-200/40' },
     image: '/product-images/investor.webp',
     cardImage: '/product-images/investor-card.webp',
+    cardSize: { w: 440, h: 665 },
+    imageSize: { w: 900, h: 1360 },
+    compare: {
+      risk: 'Lower',
+      frequency: 'A handful a month',
+      horizon: 'Months to quarters',
+      accountType: 'Standard MT4 or MT5',
+      bestFor: 'Capital you intend to leave alone and compound',
+    },
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
@@ -240,6 +280,15 @@ export const products: Product[] = [
     accent: { chip: 'bg-amber-50 text-amber-900 ring-amber-300', glow: 'from-amber-300/40' },
     image: '/product-images/heddge.webp',
     cardImage: '/product-images/heddge-card.webp',
+    cardSize: { w: 440, h: 652 },
+    imageSize: { w: 900, h: 1333 },
+    compare: {
+      risk: 'Moderate',
+      frequency: 'Paired positions, held',
+      horizon: 'Days to weeks',
+      accountType: 'MT5 with hedging enabled',
+      bestFor: 'Protecting capital through volatile conditions',
+    },
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',

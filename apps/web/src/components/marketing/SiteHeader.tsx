@@ -6,6 +6,7 @@ import { isAuthenticated } from '@/lib/api';
 
 const links = [
   { to: '/products', label: 'Expert Advisors' },
+  { to: '/products/compare', label: 'Compare' },
   { to: '/services', label: 'Services' },
   { to: '/how-it-works', label: 'How it works' },
   { to: '/contact', label: 'Contact' },
