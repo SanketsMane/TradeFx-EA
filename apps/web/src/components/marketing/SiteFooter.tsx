@@ -66,6 +66,7 @@ export default function SiteFooter() {
                 { to: '/products/compare', label: 'Compare Expert Advisors' },
                 { to: '/supported-brokers', label: 'Supported brokers' },
                 { to: '/how-it-works', label: 'How it works' },
+                { to: '/guides', label: 'Guides' },
                 { to: '/contact', label: 'Contact' },
                 { to: '/quote', label: 'Request a quote' },
                 { to: '/login', label: 'Sign in' },

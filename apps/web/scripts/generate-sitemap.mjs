@@ -33,6 +33,11 @@ if (productSlugs.length === 0) {
   throw new Error('No product slugs found in catalog.ts — the sitemap would be incomplete.');
 }
 
+const guidesSrc = readFileSync(resolve(here, '../src/lib/guides.ts'), 'utf8');
+const guidesBlock = guidesSrc.match(/export const guides: Guide\[\] = \[([\s\S]*?)\n\];/);
+if (!guidesBlock) throw new Error('Could not locate the guides array in guides.ts.');
+const guideSlugs = [...guidesBlock[1].matchAll(/^\s{4}slug: '([a-z0-9-]+)',$/gm)].map((m) => m[1]);
+
 /** Public, indexable routes. Anything behind a login is deliberately absent. */
 const routes = [
   { path: '/', priority: '1.0', changefreq: 'weekly' },
@@ -43,6 +48,8 @@ const routes = [
   ...serviceSlugs.map((s) => ({ path: `/services/${s}`, priority: '0.8', changefreq: 'monthly' })),
   { path: '/supported-brokers', priority: '0.8', changefreq: 'monthly' },
   { path: '/how-it-works', priority: '0.7', changefreq: 'monthly' },
+  { path: '/guides', priority: '0.7', changefreq: 'weekly' },
+  ...guideSlugs.map((g) => ({ path: `/guides/${g}`, priority: '0.7', changefreq: 'monthly' })),
   { path: '/quote', priority: '0.7', changefreq: 'monthly' },
   { path: '/contact', priority: '0.6', changefreq: 'monthly' },
 ];
@@ -65,5 +72,5 @@ ${routes
 
 writeFileSync(resolve(here, '../public/sitemap.xml'), xml);
 console.log(
-  `sitemap.xml: ${routes.length} URLs (${productSlugs.length} products, ${serviceSlugs.length} services)`,
+  `sitemap.xml: ${routes.length} URLs (${productSlugs.length} products, ${serviceSlugs.length} services, ${guideSlugs.length} guides)`,
 );

@@ -91,6 +91,36 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://tradefx.in/guides</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tradefx.in/guides/connect-ea-to-mt5</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tradefx.in/guides/forex-ea-without-vps</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tradefx.in/guides/gold-scalping-ea-mt5</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tradefx.in/guides/hedging-ea-mt5</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://tradefx.in/quote</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>monthly</changefreq>

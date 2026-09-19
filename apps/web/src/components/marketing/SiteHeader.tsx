@@ -9,6 +9,7 @@ const links = [
   { to: '/products/compare', label: 'Compare' },
   { to: '/services', label: 'Services' },
   { to: '/how-it-works', label: 'How it works' },
+  { to: '/guides', label: 'Guides' },
   { to: '/contact', label: 'Contact' },
 ];
 
