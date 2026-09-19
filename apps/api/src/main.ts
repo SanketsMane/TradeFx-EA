@@ -37,8 +37,21 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
 
   const port = config.get<number>('API_PORT', 3000);
-  await app.listen(port);
-  new Logger('Bootstrap').log(`API listening on http://localhost:${port}/api/v1`);
+
+  /*
+   * Bind to loopback in production. The API always sits behind nginx, so
+   * listening on every interface only creates a second, unprotected way in —
+   * no TLS and none of the proxy's security headers. A firewall should cover
+   * that too, but this does not depend on one being configured correctly.
+   * Dev keeps 0.0.0.0 so a phone on the same network can reach it.
+   */
+  const host = config.get<string>(
+    'API_HOST',
+    config.get<string>('NODE_ENV') === 'production' ? '127.0.0.1' : '0.0.0.0',
+  );
+
+  await app.listen(port, host);
+  new Logger('Bootstrap').log(`API listening on http://${host}:${port}/api/v1`);
 }
 
 void bootstrap();
