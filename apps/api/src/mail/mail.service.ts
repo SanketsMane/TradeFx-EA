@@ -4,6 +4,7 @@ import { Role, UserStatus } from '@prisma/client';
 import { createTransport, type Transporter } from 'nodemailer';
 import { PrismaService } from '../prisma/prisma.service';
 import { SettingsService, SmtpConfig } from '../settings/settings.service';
+import { ResendService } from './resend.service';
 import { copyAlertEmail, inviteEmail, passwordResetLinkEmail, resetEmail } from './templates';
 
 export interface MailInput {
@@ -33,12 +34,16 @@ function errMsg(e: unknown): string {
 }
 
 /**
- * Outbound email via SMTP (nodemailer). Configuration comes from SettingsService
- * (DB, encrypted) with env fallback. The transporter is cached and rebuilt only
- * when the underlying SMTP config changes.
+ * Outbound email.
  *
- * `send()` is best-effort and never throws — email must never break the action
- * that triggered it (admin invite, password reset, copy alerts).
+ * Two transports. Resend (HTTP API) is used whenever RESEND_API_KEY is set;
+ * otherwise mail goes over SMTP via nodemailer, configured from
+ * SettingsService (DB, encrypted) with env fallback. Resend wins because it
+ * is the deliberate platform choice — SMTP stays so an operator can still
+ * point the system at their own server from the Settings screen.
+ *
+ * `send()` is best-effort and never throws — email must never break the
+ * action that triggered it (admin invite, password reset, failure alerts).
  */
 @Injectable()
 export class MailService {
@@ -53,10 +58,32 @@ export class MailService {
     private readonly settings: SettingsService,
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly resend: ResendService,
   ) {}
 
   isConfigured(): boolean {
-    return this.settings.hasSmtp();
+    return this.resend.enabled || this.settings.hasSmtp();
+  }
+
+  /** Which transport a send would use right now. */
+  activeTransport(): 'resend' | 'smtp' | 'none' {
+    if (this.resend.enabled) return 'resend';
+    return this.settings.hasSmtp() ? 'smtp' : 'none';
+  }
+
+  /**
+   * Alert settings live on the SMTP row, but they are transport-independent —
+   * fall back to the environment so alerts still work on a Resend-only setup.
+   */
+  private alertsEnabled(): boolean {
+    const cfg = this.settings.getSmtpConfig();
+    if (cfg) return cfg.alertsEnabled;
+    return (this.config.get<string>('ALERTS_ENABLED') ?? 'true').toLowerCase() !== 'false';
+  }
+
+  private configuredAlertEmail(): string | null {
+    const cfg = this.settings.getSmtpConfig();
+    return cfg?.alertEmail || this.config.get<string>('ALERT_EMAIL')?.trim() || null;
   }
 
   private appUrl(): string | null {
@@ -89,8 +116,11 @@ export class MailService {
     return cfg.fromName ? `"${cfg.fromName}" <${email}>` : email;
   }
 
-  /** Verifies the SMTP connection/credentials for the given (or stored) config. */
+  /** Verifies the active transport: the Resend key, or the SMTP connection. */
   async verify(cfg?: SmtpConfig | null): Promise<MailResult> {
+    // An explicit config means the Settings screen is testing SMTP on purpose.
+    if (!cfg && this.resend.enabled) return this.resend.verify();
+
     const c = cfg ?? this.settings.getSmtpConfig();
     if (!c) return { ok: false, message: 'No SMTP configuration set.' };
     try {
@@ -117,12 +147,31 @@ export class MailService {
     }
   }
 
-  /** Best-effort send using the stored config. Never throws. */
+  /** Best-effort send over the active transport. Never throws. */
   async send(input: MailInput): Promise<MailResult> {
+    if (this.resend.enabled) {
+      // `to` may be a comma-joined list (alerts); Resend wants an array.
+      const to = input.to
+        .split(',')
+        .map((a) => a.trim())
+        .filter(Boolean);
+      if (to.length === 0) return { ok: false, message: 'No recipient.' };
+
+      const r = await this.resend.send({
+        from: this.resend.defaultFrom,
+        to,
+        subject: input.subject,
+        html: input.html,
+        text: input.text,
+      });
+      if (!r.ok) this.logger.error(`Email "${input.subject}" to ${input.to} failed: ${r.message}`);
+      return { ok: r.ok, message: r.message };
+    }
+
     const cfg = this.settings.getSmtpConfig();
     if (!cfg) {
-      this.logger.warn(`SMTP not configured — skipping "${input.subject}" to ${input.to}`);
-      return { ok: false, message: 'SMTP not configured.' };
+      this.logger.warn(`No mail transport configured — skipping "${input.subject}" to ${input.to}`);
+      return { ok: false, message: 'No mail transport configured.' };
     }
     const r = await this.sendWith(cfg, input);
     if (!r.ok) this.logger.error(`Email "${input.subject}" to ${input.to} failed: ${r.message}`);
@@ -160,8 +209,8 @@ export class MailService {
 
   /** Recipients for copy alerts: configured alertEmail, else all active super-admins. */
   private async alertRecipients(): Promise<string[]> {
-    const cfg = this.settings.getSmtpConfig();
-    if (cfg?.alertEmail) return [cfg.alertEmail];
+    const configured = this.configuredAlertEmail();
+    if (configured) return [configured];
     const admins = await this.prisma.user.findMany({
       where: { role: Role.SUPER_ADMIN, status: UserStatus.ACTIVE },
       select: { email: true },
@@ -174,8 +223,7 @@ export class MailService {
    * throttles per receiver+symbol so a broker outage can't flood the inbox.
    */
   async sendCopyAlert(evt: CopyAlertInput): Promise<void> {
-    const cfg = this.settings.getSmtpConfig();
-    if (!cfg || !cfg.alertsEnabled) return;
+    if (!this.isConfigured() || !this.alertsEnabled()) return;
 
     const key = `${evt.receiverAccountId}|${evt.symbol}|${evt.side}`;
     const now = Date.now();

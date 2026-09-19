@@ -4,6 +4,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuditService } from '../common/audit/audit.service';
 import { MailService } from '../mail/mail.service';
+import { ResendService } from '../mail/resend.service';
 import { SettingsService } from './settings.service';
 import {
   SetMetaApiDto,
@@ -19,6 +20,7 @@ export class SettingsController {
   constructor(
     private readonly settings: SettingsService,
     private readonly mail: MailService,
+    private readonly resend: ResendService,
     private readonly audit: AuditService,
   ) {}
 
@@ -62,7 +64,20 @@ export class SettingsController {
   // ---- SMTP / email ----
   @Get('smtp')
   smtpStatus() {
-    return this.settings.getSmtpStatus();
+    /*
+     * The SMTP row is only half the picture now. When RESEND_API_KEY is set,
+     * mail goes over Resend and the SMTP fields are unused — reporting
+     * "not configured" then would be actively misleading, so the response
+     * says which transport is really in play.
+     */
+    return {
+      ...this.settings.getSmtpStatus(),
+      transport: this.mail.activeTransport(),
+      resend: {
+        enabled: this.resend.enabled,
+        from: this.resend.enabled ? this.resend.defaultFrom : null,
+      },
+    };
   }
 
   @Put('smtp')
@@ -102,6 +117,34 @@ export class SettingsController {
       entityType: 'PlatformSetting',
       entityId: 'singleton',
       meta: { to: dto.to, ok: sent.ok },
+    });
+    return sent;
+  }
+
+  /** Tests the transport that is actually in use (Resend, or stored SMTP). */
+  @Post('email/test')
+  @HttpCode(HttpStatus.OK)
+  async emailTest(@Body() dto: TestSmtpDto, @CurrentUser('sub') userId: string) {
+    const transport = this.mail.activeTransport();
+    if (transport === 'none') {
+      return { ok: false, message: 'No mail transport is configured.' };
+    }
+
+    const verified = await this.mail.verify();
+    if (!verified.ok || !dto.to) return verified;
+
+    const sent = await this.mail.send({
+      to: dto.to,
+      subject: 'TradeFx — test email',
+      text: `This is a test email from TradeFx, sent over ${transport}.`,
+      html: `<p>This is a test email from <strong>TradeFx</strong>, sent over ${transport}.</p>`,
+    });
+    await this.audit.log({
+      userId,
+      action: 'EMAIL_TEST_SENT',
+      entityType: 'PlatformSetting',
+      entityId: 'singleton',
+      meta: { to: dto.to, transport, ok: sent.ok },
     });
     return sent;
   }

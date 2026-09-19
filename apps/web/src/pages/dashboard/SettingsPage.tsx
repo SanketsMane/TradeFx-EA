@@ -325,9 +325,10 @@ function SmtpCard() {
           <Mail className="h-4 w-4 text-brand-600" /> Email / SMTP
         </div>
         {!loading &&
-          (status?.configured ? (
+          (status && status.transport !== 'none' ? (
             <Badge tone="green">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Connected
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              {status.transport === 'resend' ? 'Resend' : 'SMTP'}
             </Badge>
           ) : (
             <Badge tone="amber">Not configured</Badge>
@@ -338,6 +339,22 @@ function SmtpCard() {
         <LoadingBlock />
       ) : (
         <>
+          {status?.resend.enabled && (
+            <div className="mb-5 rounded-lg border border-emerald-100 bg-emerald-50/60 px-4 py-3 text-sm">
+              <div className="font-medium text-emerald-800">
+                Sending through Resend (from the environment)
+              </div>
+              <div className="mt-1 text-emerald-700">
+                From <span className="font-mono">{status.resend.from}</span>
+              </div>
+              <p className="mt-2 text-emerald-700/90">
+                Resend takes priority over the SMTP settings below, which stay available as a
+                fallback. The API key lives in the server environment, not on this screen — the
+                sender domain has to be verified in your Resend account or mail is rejected.
+              </p>
+            </div>
+          )}
+
           {status?.configured ? (
             <div className="mb-5 rounded-lg border border-emerald-100 bg-emerald-50/60 px-4 py-3 text-sm">
               <div className="font-medium text-emerald-800">
@@ -352,10 +369,13 @@ function SmtpCard() {
               </div>
             </div>
           ) : (
-            <p className="mb-5 rounded-lg border border-amber-100 bg-amber-50/60 px-4 py-3 text-sm text-amber-800">
-              No email configured. Add your SMTP details to send admin invites, password-reset
-              notices and copy alerts. For Gmail, use an app password (not your normal password).
-            </p>
+            !status?.resend.enabled && (
+              <p className="mb-5 rounded-lg border border-amber-100 bg-amber-50/60 px-4 py-3 text-sm text-amber-800">
+                No email configured. Set RESEND_API_KEY in the server environment, or add SMTP
+                details below, to send admin invites, password-reset notices and failure alerts.
+                For Gmail, use an app password (not your normal password).
+              </p>
+            )
           )}
 
           <div className="space-y-4">
@@ -414,7 +434,7 @@ function SmtpCard() {
 
             <div className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
               <div>
-                <div className="text-sm font-medium text-gray-800">Copy alerts</div>
+                <div className="text-sm font-medium text-gray-800">Execution alerts</div>
                 <div className="text-xs text-gray-400">Email when a copy fails (errors only).</div>
               </div>
               <Switch checked={alertsEnabled} onChange={setAlertsEnabled} />
@@ -422,7 +442,7 @@ function SmtpCard() {
 
             <Field
               label="Alert recipient"
-              hint="Where copy alerts go. Leave blank to notify all super-admins."
+              hint="Where execution-failure alerts go. Leave blank to notify all super-admins."
             >
               <Input
                 type="email"

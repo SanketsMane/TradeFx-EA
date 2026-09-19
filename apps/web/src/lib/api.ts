@@ -133,6 +133,10 @@ export interface MetaApiStatus {
   tokenPreview: string | null;
   source: 'settings' | 'env' | 'none';
   updatedAt: string | null;
+  /** Which transport actually sends mail right now. */
+  transport: 'resend' | 'smtp' | 'none';
+  /** Resend is configured from the environment, not this screen. */
+  resend: { enabled: boolean; from: string | null };
 }
 
 export interface SmtpStatus {
@@ -147,6 +151,10 @@ export interface SmtpStatus {
   alertsEnabled: boolean;
   source: 'settings' | 'env' | 'none';
   updatedAt: string | null;
+  /** Which transport actually sends mail right now. */
+  transport: 'resend' | 'smtp' | 'none';
+  /** Resend is configured from the environment, not this screen. */
+  resend: { enabled: boolean; from: string | null };
 }
 
 export interface SmtpInput {
@@ -620,6 +628,12 @@ export const settingsApi = {
   smtpStatus: () => apiFetch<SmtpStatus>('/settings/smtp'),
   smtpSet: (body: SmtpInput) =>
     apiFetch<SmtpStatus>('/settings/smtp', { method: 'PUT', body: JSON.stringify(body) }),
+  /** Tests whichever transport is active (Resend, or the stored SMTP config). */
+  emailTest: (body: { to?: string }) =>
+    apiFetch<{ ok: boolean; message: string }>('/settings/email/test', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
   smtpTest: (body: Partial<SmtpInput> & { to?: string }) =>
     apiFetch<{ ok: boolean; message: string }>('/settings/smtp/test', {
       method: 'POST',
