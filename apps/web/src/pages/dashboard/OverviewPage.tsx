@@ -11,7 +11,14 @@ import {
   StatCard,
 } from '@/components/ui/misc';
 import { useAsync } from '@/hooks/useAsync';
-import { accountsApi, copierApi, monitoringApi, reportsApi, type CopyEvent } from '@/lib/api';
+import {
+  accountsApi,
+  copierApi,
+  monitoringApi,
+  reportsApi,
+  usersApi,
+  type CopyEvent,
+} from '@/lib/api';
 import { money, num, pct, pnlColor } from '@/lib/format';
 
 function MiniStat({ label, value, tone }: { label: string; value: ReactNode; tone?: string }) {
@@ -41,6 +48,8 @@ export default function OverviewPage() {
     return { accounts, copiers, overview, recent, snapshots };
   }, []);
 
+  const platform = useAsync(() => usersApi.stats(), []);
+
   if (loading) return <LoadingBlock />;
   if (error || !data) return <ErrorState message={error ?? 'Failed to load'} onRetry={reload} />;
 
@@ -66,12 +75,41 @@ export default function OverviewPage() {
 
   return (
     <>
-      <PageHeader title="Dashboard" subtitle="Overview of your copy operation." />
+      <PageHeader title="Dashboard" subtitle="Platform health, customers and execution at a glance." />
+
+      {/* Unanswered quotations are lost revenue, so they lead the page. */}
+      {(platform.data?.openQuotes ?? 0) > 0 && (
+        <Link
+          to="/dashboard/quotes"
+          className="mb-6 flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 transition-colors hover:bg-amber-100"
+        >
+          <div>
+            <div className="text-sm font-semibold text-amber-900">
+              {platform.data?.openQuotes} quotation
+              {platform.data?.openQuotes === 1 ? '' : 's'} waiting for a reply
+            </div>
+            <div className="mt-0.5 text-xs text-amber-800">
+              A customer is waiting on a price before they can buy.
+            </div>
+          </div>
+          <span className="shrink-0 text-sm font-semibold text-amber-900">Open inbox &rarr;</span>
+        </Link>
+      )}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Customers"
+          value={platform.data?.customers ?? '—'}
+          sub={`${platform.data?.activeCustomers ?? 0} active`}
+        />
+        <StatCard
+          label="Active licences"
+          value={platform.data?.activeLicenses ?? '—'}
+          sub={`${platform.data?.licenses ?? 0} issued in total`}
+        />
         <StatCard label="Accounts" value={accounts.length} sub={`${connected} connected`} />
         <StatCard label="EA Masters" value={copiers.length} sub={`${activeCopiers} active`} />
-        <StatCard label="Receivers" value={receivers} sub="across all copiers" />
+        <StatCard label="Client accounts" value={receivers} sub="attached to a master" />
         <StatCard
           label="Realized P/L"
           value={<span className={pnlColor(realized)}>{money(realized, { sign: true })}</span>}

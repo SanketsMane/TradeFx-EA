@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Activity,
+  Building2,
   BarChart3,
   ChevronDown,
   Copy,
@@ -13,10 +14,12 @@ import {
   MonitorSmartphone,
   PanelLeftClose,
   PanelLeftOpen,
+  FileText,
   ScrollText,
   Settings,
   ShieldCheck,
   SlidersHorizontal,
+  Users,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -152,6 +155,15 @@ export default function DashboardLayout() {
       items: [
         { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
         { to: '/dashboard/accounts', label: 'Accounts', icon: SlidersHorizontal },
+      ],
+    },
+    {
+      label: 'Customers',
+      items: [
+        { to: '/dashboard/users', label: 'Users', icon: Users },
+        { to: '/dashboard/quotes', label: 'Quotations', icon: FileText },
+        { to: '/dashboard/licenses', label: 'Licences', icon: KeyRound },
+        { to: '/dashboard/brokers', label: 'Partner Brokers', icon: Building2 },
       ],
     },
     {

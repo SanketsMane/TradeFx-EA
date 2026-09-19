@@ -19,6 +19,8 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { LicensesModule } from './licenses/licenses.module';
+import { UsersModule } from './users/users.module';
+import { BrokersModule } from './brokers/brokers.module';
 import { PortalModule } from './portal/portal.module';
 import { HealthModule } from './health/health.module';
 import { SeedModule } from './seed/seed.module';
@@ -49,6 +51,8 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     ReportsModule,
     QuotesModule,
     LicensesModule,
+    UsersModule,
+    BrokersModule,
     PortalModule,
     HealthModule,
     SeedModule,

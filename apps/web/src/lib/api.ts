@@ -846,3 +846,141 @@ export const otpApi = {
     return { status: 'SIGNED_IN', user: data.user };
   },
 };
+
+// ---------------------------------------------------------------------------
+// Admin: platform users
+// ---------------------------------------------------------------------------
+export interface PlatformUser {
+  id: string;
+  email: string;
+  fullName: string | null;
+  phone: string | null;
+  role: Role;
+  status: UserStatus;
+  createdAt: string;
+  updatedAt: string;
+  _count: { licenses: number; ownedAccounts: number; quoteRequests: number };
+}
+
+export interface PlatformUserDetail extends PlatformUser {
+  licenses: EaLicense[];
+  ownedAccounts: (AccountMini & { server: string; currency: string; createdAt: string })[];
+  quoteRequests: {
+    id: string;
+    reference: string;
+    productSlug: string | null;
+    serviceSlug: string | null;
+    status: QuoteStatus;
+    createdAt: string;
+  }[];
+  sessions: {
+    id: string;
+    userAgent: string | null;
+    ip: string | null;
+    createdAt: string;
+    lastUsedAt: string;
+  }[];
+}
+
+export interface UserQuery {
+  role?: Role;
+  status?: UserStatus;
+  q?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PlatformStats {
+  customers: number;
+  activeCustomers: number;
+  staff: number;
+  licenses: number;
+  activeLicenses: number;
+  openQuotes: number;
+}
+
+export const usersApi = {
+  list: (q: UserQuery = {}) => {
+    const p = new URLSearchParams();
+    Object.entries(q).forEach(([k, v]) => v != null && v !== '' && p.set(k, String(v)));
+    return apiFetch<{ items: PlatformUser[]; total: number }>(`/users?${p.toString()}`);
+  },
+  stats: () => apiFetch<PlatformStats>('/users/stats'),
+  get: (id: string) => apiFetch<PlatformUserDetail>(`/users/${id}`),
+  setStatus: (id: string, status: UserStatus, reason?: string) =>
+    apiFetch<{ user: PlatformUser; pausedSubscriptions: number; revokedSessions: number }>(
+      `/users/${id}/status`,
+      { method: 'PATCH', body: JSON.stringify({ status, reason }) },
+    ),
+  resetPassword: (id: string, password: string) =>
+    apiFetch<void>(`/users/${id}/reset-password`, {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }),
+  revokeSessions: (id: string) =>
+    apiFetch<{ revoked: number }>(`/users/${id}/revoke-sessions`, { method: 'POST' }),
+  remove: (id: string) => apiFetch<void>(`/users/${id}`, { method: 'DELETE' }),
+};
+
+// ---------------------------------------------------------------------------
+// Admin: quotations
+// ---------------------------------------------------------------------------
+export interface AdminQuoteRequest extends QuoteRequest {
+  userId: string | null;
+  name: string;
+  email: string;
+  phone: string | null;
+  quotedById: string | null;
+  updatedAt: string;
+}
+
+export const adminQuotesApi = {
+  list: (status?: QuoteStatus) =>
+    apiFetch<AdminQuoteRequest[]>(`/quotes${status ? `?status=${status}` : ''}`),
+  update: (id: string, body: { status?: QuoteStatus; quotedNote?: string }) =>
+    apiFetch<AdminQuoteRequest>(`/quotes/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+};
+
+// ---------------------------------------------------------------------------
+// Admin: licences
+// ---------------------------------------------------------------------------
+export interface AdminLicense extends Omit<EaLicense, 'linkedAccount'> {
+  user: { id: string; email: string; fullName: string | null };
+  linkedAccount: { id: string; label: string; login: string; platform: Platform } | null;
+}
+
+export const adminLicensesApi = {
+  list: (userId?: string) =>
+    apiFetch<AdminLicense[]>(`/licenses${userId ? `?userId=${userId}` : ''}`),
+  issue: (body: { userId: string; productSlug: string; expiresAt?: string }) =>
+    apiFetch<AdminLicense>('/licenses', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: string, body: { status?: LicenseStatus; expiresAt?: string }) =>
+    apiFetch<AdminLicense>(`/licenses/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+};
+
+// ---------------------------------------------------------------------------
+// Admin: partner brokers
+// ---------------------------------------------------------------------------
+export interface AdminBroker extends BrokerOffer {
+  sortOrder: number;
+  published: boolean;
+}
+
+export interface BrokerInput {
+  name: string;
+  blurb: string;
+  signupUrl: string;
+  logo?: string;
+  highlights?: string[];
+  sortOrder?: number;
+  published?: boolean;
+}
+
+export const adminBrokersApi = {
+  list: () => apiFetch<AdminBroker[]>('/brokers'),
+  create: (body: BrokerInput) =>
+    apiFetch<AdminBroker>('/brokers', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: string, body: Partial<BrokerInput>) =>
+    apiFetch<AdminBroker>(`/brokers/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  remove: (id: string) => apiFetch<void>(`/brokers/${id}`, { method: 'DELETE' }),
+};

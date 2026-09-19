@@ -29,6 +29,11 @@ import CopierDetailPage from './pages/dashboard/CopierDetailPage';
 import MonitorPage from './pages/dashboard/MonitorPage';
 import HistoryPage from './pages/dashboard/HistoryPage';
 import ReportsPage from './pages/dashboard/ReportsPage';
+import UsersPage from './pages/dashboard/UsersPage';
+import UserDetailPage from './pages/dashboard/UserDetailPage';
+import QuotesPage from './pages/dashboard/QuotesPage';
+import LicensesPage from './pages/dashboard/LicensesPage';
+import BrokersPage from './pages/dashboard/BrokersPage';
 import AdminsPage from './pages/dashboard/AdminsPage';
 import AuditPage from './pages/dashboard/AuditPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
@@ -101,6 +106,13 @@ export default function App() {
           <Route path="monitor" element={<MonitorPage />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          {/* Customer-facing administration — readable by any staff member;
+              the destructive actions are gated server-side to SUPER_ADMIN. */}
+          <Route path="users" element={<UsersPage />} />
+          <Route path="users/:id" element={<UserDetailPage />} />
+          <Route path="quotes" element={<QuotesPage />} />
+          <Route path="licenses" element={<LicensesPage />} />
+          <Route path="brokers" element={<BrokersPage />} />
           <Route
             path="admins"
             element={
