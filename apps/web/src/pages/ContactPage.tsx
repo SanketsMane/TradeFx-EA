@@ -3,7 +3,7 @@ import { ArrowRight, Clock, Mail, MessageCircle, Send } from 'lucide-react';
 import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
 import { useSeo } from '@/lib/useSeo';
-import { breadcrumbSchema } from '@/lib/seo';
+import { breadcrumbSchema, faqSchema } from '@/lib/seo';
 import { TELEGRAM_URL } from '@/lib/contact';
 
 /**
@@ -40,16 +40,43 @@ const channels = [
   },
 ];
 
+/** What people actually write in, ordered by how often. */
+const FAQS = [
+  {
+    q: 'How quickly do you reply?',
+    a: 'Telegram is usually answered within the hour during market hours. Email is answered the same business day, and by Monday for anything that arrives over a weekend.',
+  },
+  {
+    q: 'I am an existing customer and something has stopped trading.',
+    a: 'Message us on Telegram with your licence code and the account it runs on. That is the fastest route, because we can look at the account straight away rather than asking for details by email.',
+  },
+  {
+    q: 'Can you tell me whether my broker will work before I buy?',
+    a: 'Yes, and we would rather you asked. Send us the broker and the account type. Most MT4 and MT5 accounts work; the exception is TradeFx Heddge, which needs hedging enabled.',
+  },
+  {
+    q: 'Do you offer phone support?',
+    a: 'Not as a general channel. Trading questions are easier to answer with the account in front of us, so almost everything is handled over Telegram or email. For development projects we will happily arrange a call.',
+  },
+  {
+    q: 'Can I visit an office?',
+    a: 'We work remotely and do not run a walk-in office. Everything from a quotation to a full development project is handled online.',
+  },
+];
+
 export default function ContactPage() {
   useSeo({
     title: 'Contact TradeFx',
     path: '/contact',
     description:
       'Questions about which Expert Advisor suits your account, whether your broker is supported, or a project you want built. Reach TradeFx by email or Telegram.',
-    jsonLd: breadcrumbSchema([
-      { name: 'Home', path: '/' },
-      { name: 'Contact', path: '/contact' },
-    ]),
+    jsonLd: [
+      faqSchema(FAQS),
+      breadcrumbSchema([
+        { name: 'Home', path: '/' },
+        { name: 'Contact', path: '/contact' },
+      ]),
+    ],
   });
 
   return (
@@ -107,6 +134,65 @@ export default function ContactPage() {
               </a>
             );
           })}
+        </div>
+
+        <div className="mt-12 grid gap-8 lg:grid-cols-2">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+              What to include
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-gray-700">
+              The more of this you send first time, the fewer rounds it takes to get you a real
+              answer.
+            </p>
+            <ul className="mt-4 space-y-2.5">
+              {[
+                'Which Expert Advisor or service you are asking about',
+                'Your broker and the account type, if you already trade',
+                'Roughly what size account it would run on',
+                'Your licence code, if you are an existing customer',
+              ].map((x) => (
+                <li key={x} className="flex gap-2.5 text-sm leading-relaxed text-gray-700">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600" />
+                  {x}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+              What we cannot help with
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-gray-700">
+              Saying this up front saves everyone a round of email.
+            </p>
+            <ul className="mt-4 space-y-2.5">
+              {[
+                'Investment advice, or telling you what to trade — we supply software, not advice',
+                'Managing your money; your funds stay with your broker, in your name',
+                'Predictions of what an Expert Advisor will return',
+                'Legal or tax questions about trading in your jurisdiction',
+              ].map((x) => (
+                <li key={x} className="flex gap-2.5 text-sm leading-relaxed text-gray-700">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-300" />
+                  {x}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900">Common questions</h2>
+          <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+            {FAQS.map((f) => (
+              <div key={f.q} className="rounded-2xl border border-gray-200 bg-white p-5">
+                <dt className="font-semibold text-gray-900">{f.q}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-gray-600">{f.a}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
         <div className="mt-12 rounded-2xl border border-brand-100 bg-brand-50 p-8 text-center">

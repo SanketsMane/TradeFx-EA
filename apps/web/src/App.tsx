@@ -6,6 +6,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import CompareProductsPage from './pages/CompareProductsPage';
 import SupportedBrokersPage from './pages/SupportedBrokersPage';
 import ServicesPage from './pages/ServicesPage';
+import ServiceDetailPage from './pages/ServiceDetailPage';
 import HowItWorksPage from './pages/HowItWorksPage';
 import ContactPage from './pages/ContactPage';
 import QuotePage from './pages/QuotePage';
@@ -93,6 +94,7 @@ export default function App() {
         <Route path="/products/:slug" element={<ProductDetailPage />} />
         <Route path="/supported-brokers" element={<SupportedBrokersPage />} />
         <Route path="/services" element={<ServicesPage />} />
+        <Route path="/services/:slug" element={<ServiceDetailPage />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/quote" element={<QuotePage />} />

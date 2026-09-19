@@ -201,7 +201,7 @@ export default function LandingPage() {
             {services.map((s) => (
               <Link
                 key={s.slug}
-                to={`/services#${s.slug}`}
+                to={`/services/${s.slug}`}
                 className="group rounded-2xl border border-white/10 bg-white/5 p-6 transition-colors hover:border-brand-500/50 hover:bg-white/10"
               >
                 <div className="grid h-11 w-11 place-content-center rounded-xl bg-brand-600/20 text-brand-400">

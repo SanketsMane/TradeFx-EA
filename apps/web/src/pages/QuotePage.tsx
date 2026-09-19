@@ -6,6 +6,7 @@ import SiteFooter from '@/components/marketing/SiteFooter';
 import { products, services } from '@/lib/catalog';
 import { quotesApi } from '@/lib/api';
 import { useSeo } from '@/lib/useSeo';
+import { faqSchema } from '@/lib/seo';
 
 const FIELD =
   'h-11 w-full rounded-xl border border-gray-200 bg-white px-3.5 text-sm text-gray-900 outline-none transition-shadow placeholder:text-gray-400 focus:border-brand-400 focus:ring-2 focus:ring-brand-100';
@@ -18,12 +19,41 @@ const ACCOUNT_SIZES = [
   'Over $100,000',
 ];
 
+/** Answers the questions that stop people submitting the form. */
+const FAQS = [
+  {
+    q: 'Why is there no price list?',
+    a: 'Because the right figure depends on which Expert Advisor you want, the size of the account it will run on and how many accounts you are licensing. A single published number would be wrong for most people who read it. An advisor reads your request and replies with a figure for your situation.',
+  },
+  {
+    q: 'How long until I hear back?',
+    a: 'Normally within one business day. Requests that arrive over a weekend are answered on Monday.',
+  },
+  {
+    q: 'Am I committing to anything?',
+    a: 'No. This is a request for a price, not an order. Nothing is charged, no payment details are taken on this form, and nothing starts trading until you have agreed a price and confirmed a purchase.',
+  },
+  {
+    q: 'What happens after I accept a quote?',
+    a: 'We issue a nine-character licence code to your account and email it to you. You connect your MT4 or MT5 account with that code, we verify it, and the Expert Advisor starts trading.',
+  },
+  {
+    q: 'What if I am not sure which Expert Advisor I need?',
+    a: 'Say so in the message. Tell us your account size, your broker and how much drawdown you are willing to sit through, and the reply will include a recommendation as well as a price.',
+  },
+  {
+    q: 'Do you quote for development work too?',
+    a: 'Yes. Pick the relevant service instead of an Expert Advisor and describe the project. Development quotes usually need a short conversation first, so expect a reply asking a few questions before a number.',
+  },
+];
+
 export default function QuotePage() {
   useSeo({
     title: 'Request a Quotation',
     path: '/quote',
     description:
       'Tell us which Expert Advisor you want and a little about your account. We price per trading account, so an advisor replies with a figure — usually within one business day.',
+    jsonLd: faqSchema(FAQS),
   });
   const [params] = useSearchParams();
 
@@ -312,6 +342,57 @@ export default function QuotePage() {
               We use your details only to answer this enquiry.
             </p>
           </form>
+        </div>
+      </section>
+
+      {/* Everything below exists because "why no price?" is the objection that
+          stops people submitting the form. */}
+      <section className="border-t border-gray-100 bg-gray-50">
+        <div className="mx-auto max-w-3xl px-4 py-14">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+            How our pricing works
+          </h2>
+          <div className="mt-5 space-y-4 text-base leading-relaxed text-gray-700">
+            <p>
+              Expert Advisors are licensed per trading account. One licence covers one MetaTrader
+              account, and the code is tied to it when you connect.
+            </p>
+            <p>
+              What changes the figure is which Expert Advisor you want, the size of the account it
+              will run on, and how many accounts you are licensing at once. That is why there is no
+              price list — a single published number would be wrong for most of the people reading
+              it, and we would rather quote you honestly than anchor you to a figure that does not
+              apply.
+            </p>
+            <p>
+              Nothing on this page takes payment details, and nothing you send here is an order. If
+              the figure does not suit you, that is the end of it.
+            </p>
+          </div>
+
+          <h2 className="mt-12 text-2xl font-bold tracking-tight text-gray-900">
+            Before you ask
+          </h2>
+          <dl className="mt-6 space-y-4">
+            {FAQS.map((f) => (
+              <div key={f.q} className="rounded-2xl border border-gray-200 bg-white p-5">
+                <dt className="font-semibold text-gray-900">{f.q}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-gray-600">{f.a}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <p className="mt-8 text-sm text-gray-600">
+            <span>Not sure which one fits? </span>
+            <Link to="/products/compare" className="font-semibold text-brand-700 hover:underline">
+              Compare the four Expert Advisors
+            </Link>
+            <span> or check </span>
+            <Link to="/supported-brokers" className="font-semibold text-brand-700 hover:underline">
+              whether your broker is supported
+            </Link>
+            <span>.</span>
+          </p>
         </div>
       </section>
 

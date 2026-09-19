@@ -58,16 +58,29 @@ export default function ServicesPage() {
                       <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
                         {String(i + 1).padStart(2, '0')}
                       </span>
-                      <h2 className="text-xl font-bold text-gray-900">{s.name}</h2>
+                      <h2 className="text-xl font-bold text-gray-900">
+                        <Link to={`/services/${s.slug}`} className="hover:text-brand-700">
+                          {s.name}
+                        </Link>
+                      </h2>
                     </div>
                   </div>
                   <p className="mt-4 text-base leading-relaxed text-gray-600">{s.summary}</p>
-                  <Link
-                    to={`/quote?service=${s.slug}`}
-                    className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800"
-                  >
-                    Request a quotation <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  <div className="mt-5 flex flex-wrap gap-4">
+                    <Link
+                      to={`/services/${s.slug}`}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800"
+                    >
+                      <span>Read more</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to={`/quote?service=${s.slug}`}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-600 transition-colors hover:text-gray-900"
+                    >
+                      Request a quotation
+                    </Link>
+                  </div>
                 </div>
 
                 <ul className="space-y-2.5 rounded-xl bg-gray-50 p-5">
