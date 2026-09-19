@@ -12,7 +12,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        // 'Inter Fallback' is metric-matched to Inter (see index.css), so the
+        // swap when the web font lands does not move the page.
+        sans: ['Inter', 'Inter Fallback', 'system-ui', 'sans-serif'],
       },
       colors: {
         // TradeFx brand orange on white. 600 is the primary fill (buttons,
