@@ -57,3 +57,39 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+
+@layer components {
+  /*
+   * Entrance animation for the marketing hero.
+   *
+   * Deliberately CSS-only. The previous JavaScript reveal wrote inline
+   * opacity during render, which differed between the prerendered HTML and
+   * the first client render — hydration failed and React rebuilt the whole
+   * page, costing a repaint of the largest element and a 0.17 layout shift.
+   * A keyframe animation touches no attributes, so there is nothing to
+   * disagree about, and `both` leaves the element at its final state for
+   * anyone who never sees the animation at all.
+   */
+  .reveal {
+    animation: reveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Honour the setting: no motion, content simply present. */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      animation: none;
+    }
+  }
+}

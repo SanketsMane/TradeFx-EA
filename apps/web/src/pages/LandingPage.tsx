@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -11,24 +11,12 @@ import {
   ShieldCheck,
   Wallet,
 } from 'lucide-react';
-import { motion, type Variants } from 'framer-motion';
-import { TimelineContent } from '@/components/ui/timeline-animation';
 import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
 import ProductCard from '@/components/marketing/ProductCard';
 import { products, services } from '@/lib/catalog';
 import { useSeo } from '@/lib/useSeo';
 import { organizationSchema, websiteSchema, itemListSchema } from '@/lib/seo';
-
-const revealVariants: Variants = {
-  visible: (i: number) => ({
-    y: 0,
-    opacity: 1,
-    filter: 'blur(0px)',
-    transition: { delay: i * 0.1, duration: 0.5, ease: 'easeOut' },
-  }),
-  hidden: { filter: 'blur(8px)', y: 16, opacity: 0 },
-};
 
 const steps = [
   { icon: KeyRound, title: 'Choose and get quoted', desc: 'Pick an Expert Advisor, request a quotation and we come back with a price.' },
@@ -54,10 +42,9 @@ export default function LandingPage() {
       itemListSchema(products.map((p) => ({ name: p.name, path: `/products/${p.slug}` }))),
     ],
   });
-  const timelineRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div ref={timelineRef} className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-white text-gray-900">
       <SiteHeader />
 
       {/* ---------------- Hero ---------------- */}
@@ -66,30 +53,27 @@ export default function LandingPage() {
 
         <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 sm:pt-24">
           <div className="mx-auto max-w-3xl text-center">
-            <TimelineContent as="div" animationNum={0} timelineRef={timelineRef} customVariants={revealVariants}>
+            <div className="reveal" style={{ "--reveal-delay": "0ms" } as CSSProperties}>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-brand-700 ring-1 ring-brand-100">
                 <Gauge className="h-3.5 w-3.5" />
                 Forex Expert Advisors
               </span>
-            </TimelineContent>
+            </div>
 
-            <TimelineContent as="h1" animationNum={1} timelineRef={timelineRef} customVariants={revealVariants}
-              className="mt-5 text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl">
+            <h1 className="reveal mt-5 text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl" style={{ "--reveal-delay": "90ms" } as CSSProperties}>
               Your strategy,{' '}
               <span className="bg-gradient-to-r from-brand-600 to-amber-500 bg-clip-text text-transparent">
                 running without you
               </span>
-            </TimelineContent>
+            </h1>
 
-            <TimelineContent as="p" animationNum={2} timelineRef={timelineRef} customVariants={revealVariants}
-              className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
+            <p className="reveal mx-auto mt-5 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg" style={{ "--reveal-delay": "180ms" } as CSSProperties}>
               Four Expert Advisors for MetaTrader — scalping, multi-asset, long-term and hedged.
               Link your own broker account, enter a licence code, and let the bot trade while you
               get on with your day.
-            </TimelineContent>
+            </p>
 
-            <TimelineContent as="div" animationNum={3} timelineRef={timelineRef} customVariants={revealVariants}
-              className="mt-8 flex flex-wrap justify-center gap-3">
+            <div className="reveal mt-8 flex flex-wrap justify-center gap-3" style={{ "--reveal-delay": "270ms" } as CSSProperties}>
               <Link to="/products"
                 className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700">
                 Explore Expert Advisors <ArrowRight className="h-4 w-4" />
@@ -98,18 +82,15 @@ export default function LandingPage() {
                 className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
                 See how it works
               </Link>
-            </TimelineContent>
+            </div>
           </div>
 
           {/* Product line-up, fanned out */}
-          <TimelineContent as="div" animationNum={4} timelineRef={timelineRef} customVariants={revealVariants}
-            className="mt-14 flex items-end justify-center gap-2 sm:gap-6">
+          <div className="reveal mt-14 flex items-end justify-center gap-2 sm:gap-6" style={{ "--reveal-delay": "360ms" } as CSSProperties}>
             {products.map((p, i) => (
-              <motion.div
+              <div
                 key={p.slug}
-                whileHover={{ y: -10 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className="relative"
+                className="relative transition-transform duration-300 ease-out hover:-translate-y-2.5"
                 style={{ zIndex: i === 1 || i === 2 ? 2 : 1 }}
               >
                 <Link to={`/products/${p.slug}`} aria-label={p.name}>
@@ -123,9 +104,9 @@ export default function LandingPage() {
                     className="h-32 w-auto object-contain drop-shadow-xl sm:h-48 lg:h-60"
                   />
                 </Link>
-              </motion.div>
+              </div>
             ))}
-          </TimelineContent>
+          </div>
         </div>
       </section>
 
