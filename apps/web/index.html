@@ -26,6 +26,12 @@
     <meta property="og:url" content="https://tradefx.in/" />
     <meta property="og:image" content="https://tradefx.in/logo.png" />
     <meta name="twitter:card" content="summary" />
+
+    <!-- Google Analytics 4. The init lives in /analytics.js, not inline:
+         the CSP forbids inline scripts, so an inline block would be
+         blocked and record nothing. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-0JWB9R1688"></script>
+    <script src="/analytics.js"></script>
   </head>
   <body>
     <div id="root"></div>

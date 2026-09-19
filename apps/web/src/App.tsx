@@ -13,6 +13,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ScrollToTop from './components/ScrollToTop';
+import Analytics from './components/Analytics';
 import DashboardLayout from './components/layout/DashboardLayout';
 import PortalLayout from './components/layout/PortalLayout';
 import PortalOverviewPage from './pages/portal/PortalOverviewPage';
@@ -58,6 +59,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <Analytics />
       <Routes>
         {/* ---- Public marketing site ---- */}
         <Route path="/" element={<LandingPage />} />
