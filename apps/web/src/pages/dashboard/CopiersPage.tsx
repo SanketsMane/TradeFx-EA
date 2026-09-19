@@ -46,7 +46,7 @@ export default function CopiersPage() {
     setDeleting(true);
     try {
       await copierApi.remove(toDelete.id);
-      toast('Copier deleted', 'success');
+      toast('EA master deleted', 'success');
       setToDelete(null);
       reload();
     } catch (e) {
@@ -59,24 +59,24 @@ export default function CopiersPage() {
   return (
     <>
       <PageHeader
-        title="Copier"
-        subtitle="Each copier mirrors one source account's trades to its receivers."
+        title="EA Masters"
+        subtitle="Each master runs an Expert Advisor and mirrors its trades to client accounts."
         actions={
           <Button onClick={() => setAddOpen(true)} disabled={list.length >= MAX_COPIERS}>
-            <Plus className="h-4 w-4" /> Create Copier
+            <Plus className="h-4 w-4" /> Create EA Master
           </Button>
         }
       />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <StatCard label="Copiers" value={list.length} sub={`of ${MAX_COPIERS} allowed`} />
-        <StatCard label="Active" value={enabled} sub="copiers running" />
-        <StatCard label="Receivers" value={receivers} sub="across all copiers" />
+        <StatCard label="EA Masters" value={list.length} sub={`of ${MAX_COPIERS} allowed`} />
+        <StatCard label="Active" value={enabled} sub="masters running" />
+        <StatCard label="Receivers" value={receivers} sub="across all masters" />
       </div>
 
       <Card>
         <div className="flex items-center gap-2 border-b border-gray-100 p-4 text-sm font-semibold text-gray-800">
-          <Copy className="h-4 w-4 text-brand-600" /> Copiers
+          <Copy className="h-4 w-4 text-brand-600" /> EA Masters
         </div>
 
         {loading ? (
@@ -86,11 +86,11 @@ export default function CopiersPage() {
         ) : list.length === 0 ? (
           <EmptyState
             icon={<Copy className="h-10 w-10" />}
-            title="No copiers yet"
-            description="Create a copier and pick a source account to start copying trades."
+            title="No EA masters yet"
+            description="Create a master and pick the account the Expert Advisor runs on."
             action={
               <Button onClick={() => setAddOpen(true)}>
-                <Plus className="h-4 w-4" /> Create Copier
+                <Plus className="h-4 w-4" /> Create EA Master
               </Button>
             }
           />
@@ -160,7 +160,7 @@ export default function CopiersPage() {
         onConfirm={confirmDelete}
         loading={deleting}
         danger
-        title="Delete copier?"
+        title="Delete EA master?"
         confirmLabel="Delete"
         message={
           <>

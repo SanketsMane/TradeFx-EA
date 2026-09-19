@@ -1,138 +1,33 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import AuthShell from '@/components/auth/AuthShell';
+import AuthTabs, { type AuthMode } from '@/components/auth/AuthTabs';
+import PhoneOtpForm from '@/components/auth/PhoneOtpForm';
 import { login } from '@/lib/api';
 
-type RoutePoint = { x: number; y: number; delay: number };
-
-const DotMap = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
-  const routes: { start: RoutePoint; end: RoutePoint; color: string }[] = [
-    { start: { x: 100, y: 150, delay: 0 }, end: { x: 200, y: 80, delay: 2 }, color: '#2563eb' },
-    { start: { x: 200, y: 80, delay: 2 }, end: { x: 260, y: 120, delay: 4 }, color: '#2563eb' },
-    { start: { x: 50, y: 50, delay: 1 }, end: { x: 150, y: 180, delay: 3 }, color: '#2563eb' },
-    { start: { x: 280, y: 60, delay: 0.5 }, end: { x: 180, y: 180, delay: 2.5 }, color: '#2563eb' },
-  ];
-
-  const generateDots = (width: number, height: number) => {
-    const dots: { x: number; y: number; radius: number; opacity: number }[] = [];
-    const gap = 12;
-    const dotRadius = 1;
-    for (let x = 0; x < width; x += gap) {
-      for (let y = 0; y < height; y += gap) {
-        const isInMapShape =
-          (x < width * 0.25 && x > width * 0.05 && y < height * 0.4 && y > height * 0.1) ||
-          (x < width * 0.25 && x > width * 0.15 && y < height * 0.8 && y > height * 0.4) ||
-          (x < width * 0.45 && x > width * 0.3 && y < height * 0.35 && y > height * 0.15) ||
-          (x < width * 0.5 && x > width * 0.35 && y < height * 0.65 && y > height * 0.35) ||
-          (x < width * 0.7 && x > width * 0.45 && y < height * 0.5 && y > height * 0.1) ||
-          (x < width * 0.8 && x > width * 0.65 && y < height * 0.8 && y > height * 0.6);
-        if (isInMapShape && Math.random() > 0.3) {
-          dots.push({ x, y, radius: dotRadius, opacity: Math.random() * 0.5 + 0.2 });
-        }
-      }
-    }
-    return dots;
-  };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const resizeObserver = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
-      setDimensions({ width, height });
-      canvas.width = width;
-      canvas.height = height;
-    });
-    resizeObserver.observe(canvas.parentElement as Element);
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!dimensions.width || !dimensions.height) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const dots = generateDots(dimensions.width, dimensions.height);
-    let animationFrameId: number;
-    let startTime = Date.now();
-
-    const drawDots = () => {
-      ctx.clearRect(0, 0, dimensions.width, dimensions.height);
-      dots.forEach((dot) => {
-        ctx.beginPath();
-        ctx.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(37, 99, 235, ${dot.opacity})`;
-        ctx.fill();
-      });
-    };
-
-    const drawRoutes = () => {
-      const currentTime = (Date.now() - startTime) / 1000;
-      routes.forEach((route) => {
-        const elapsed = currentTime - route.start.delay;
-        if (elapsed <= 0) return;
-        const duration = 3;
-        const progress = Math.min(elapsed / duration, 1);
-        const x = route.start.x + (route.end.x - route.start.x) * progress;
-        const y = route.start.y + (route.end.y - route.start.y) * progress;
-        ctx.beginPath();
-        ctx.moveTo(route.start.x, route.start.y);
-        ctx.lineTo(x, y);
-        ctx.strokeStyle = route.color;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(route.start.x, route.start.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = route.color;
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x, y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = '#3b82f6';
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x, y, 6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
-        ctx.fill();
-        if (progress === 1) {
-          ctx.beginPath();
-          ctx.arc(route.end.x, route.end.y, 3, 0, Math.PI * 2);
-          ctx.fillStyle = route.color;
-          ctx.fill();
-        }
-      });
-    };
-
-    const animate = () => {
-      drawDots();
-      drawRoutes();
-      if ((Date.now() - startTime) / 1000 > 15) startTime = Date.now();
-      animationFrameId = requestAnimationFrame(animate);
-    };
-    animate();
-    return () => cancelAnimationFrame(animationFrameId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dimensions]);
-
+/** Telegram's circular glyph — lucide ships no brand marks. */
+export function TelegramIcon({ className }: { className?: string }) {
   return (
-    <div className="relative w-full h-full overflow-hidden">
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-    </div>
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="12" fill="#2AABEE" />
+      <path
+        d="M5.6 11.8c3.7-1.6 6.2-2.7 7.4-3.2 3.5-1.5 4.3-1.7 4.8-1.7.1 0 .3 0 .5.2.1.1.1.3.2.4v.5c-.2 1.9-.9 6.4-1.3 8.4-.2.9-.5 1.2-.8 1.2-.7.1-1.2-.4-1.9-.8-1-.7-1.6-1.1-2.6-1.8-1.1-.8-.4-1.2.2-1.9.2-.2 3-2.7 3-2.9 0 0 0-.1-.1-.2h-.2c-.1 0-1.7 1.1-4.8 3.2-.5.3-.9.5-1.2.5-.4 0-1.2-.2-1.7-.4-.7-.2-1.2-.3-1.2-.7s.3-.6.9-.8Z"
+        fill="#fff"
+      />
+    </svg>
   );
-};
+}
+
+const FIELD =
+  'h-12 w-full rounded-xl bg-[#f4f4f5] px-4 text-[15px] text-[#131316] outline-none transition-shadow placeholder:text-[#9b9ba1] focus:ring-2 focus:ring-brand-500';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<AuthMode>('email');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isHovered, setIsHovered] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -141,8 +36,9 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await login(email.trim(), password);
-      navigate('/dashboard');
+      const user = await login(email.trim(), password);
+      // Customers get their own portal; staff keep the admin dashboard.
+      navigate(user.role === 'CUSTOMER' ? '/app' : '/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -151,158 +47,117 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="flex w-full h-full items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-4xl overflow-hidden rounded-2xl flex bg-white shadow-xl"
+    <AuthShell>
+      <h1 className="text-[26px] font-bold leading-tight tracking-tight text-[#131316] sm:text-[30px]">
+        Log In to TradeFx
+      </h1>
+
+      <AuthTabs mode={mode} onChange={setMode} />
+
+      {mode === 'phone' ? (
+        <PhoneOtpForm askName={false} />
+      ) : (
+      <form className="mt-5" onSubmit={handleSubmit}>
+        <label htmlFor="email" className="sr-only">
+          Email address
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Please enter your email"
+          required
+          autoComplete="email"
+          className={FIELD}
+        />
+
+        <div className="relative mt-3">
+          <label htmlFor="password" className="sr-only">
+            Password
+          </label>
+          <input
+            id="password"
+            type={isPasswordVisible ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password 8-16 characters"
+            required
+            autoComplete="current-password"
+            className={`${FIELD} pr-12`}
+          />
+          <button
+            type="button"
+            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+            aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+            className="absolute inset-y-0 right-0 flex items-center px-4 text-[#6b6b70] transition-colors hover:text-[#131316]"
+          >
+            {isPasswordVisible ? (
+              <EyeOff size={18} strokeWidth={1.75} />
+            ) : (
+              <Eye size={18} strokeWidth={1.75} />
+            )}
+          </button>
+        </div>
+
+        <Link
+          to="/forgot-password"
+          className="mt-4 inline-block text-[14px] text-[#131316] [text-decoration-color:#bcbcc0] [text-decoration-line:underline] [text-decoration-style:dotted] underline-offset-4"
         >
-          {/* Left - animated map */}
-          <div className="hidden md:block w-1/2 h-[600px] relative overflow-hidden border-r border-gray-100">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100">
-              <DotMap />
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 z-10">
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.5 }}
-                  className="mb-6"
-                >
-                  <img src="/logo.png" alt="Money Bank FX" className="h-16 w-16 object-contain" />
-                </motion.div>
-                <motion.h2
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7, duration: 0.5 }}
-                  className="text-3xl font-bold mb-2 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600"
-                >
-                  Money Bank FX
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
-                  className="text-sm text-center text-gray-600 max-w-xs"
-                >
-                  Sign in to manage your master &amp; slave accounts and monitor live copies in real time.
-                </motion.p>
-              </div>
-            </div>
+          Forgot Password?
+        </Link>
+
+        {error && (
+          <div
+            role="alert"
+            className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-600"
+          >
+            {error}
           </div>
+        )}
 
-          {/* Right - form */}
-          <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-white">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h1 className="text-2xl md:text-3xl font-bold mb-1 text-gray-800">Welcome back</h1>
-              <p className="text-gray-500 mb-8">Sign in to your account</p>
+        <button
+          type="submit"
+          disabled={loading}
+          className="mt-5 flex h-12 w-full items-center justify-center rounded-xl bg-brand-600 text-[15px] font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging in…
+            </>
+          ) : (
+            'Log in'
+          )}
+        </button>
+      </form>
+      )}
 
-              <form className="space-y-5" onSubmit={handleSubmit}>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email <span className="text-blue-500">*</span>
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    required
-                    className="flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <div className="mb-1 flex items-center justify-between">
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                      Password <span className="text-blue-500">*</span>
-                    </label>
-                    <Link
-                      to="/forgot-password"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <input
-                      id="password"
-                      type={isPasswordVisible ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      required
-                      className="flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 pr-10 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
-                      onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                      aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
-                    >
-                      {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
-                    {error}
-                  </div>
-                )}
-
-                <motion.div
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                  onHoverStart={() => setIsHovered(true)}
-                  onHoverEnd={() => setIsHovered(false)}
-                  className="pt-2"
-                >
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className={cn(
-                      'inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:from-blue-600 hover:to-indigo-700 disabled:opacity-60 relative overflow-hidden',
-                      isHovered ? 'shadow-lg shadow-blue-200' : '',
-                    )}
-                  >
-                    <span className="flex items-center justify-center">
-                      {loading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in…
-                        </>
-                      ) : (
-                        <>
-                          Sign in <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </span>
-                    {isHovered && !loading && (
-                      <motion.span
-                        initial={{ left: '-100%' }}
-                        animate={{ left: '100%' }}
-                        transition={{ duration: 1, ease: 'easeInOut' }}
-                        className="absolute top-0 bottom-0 left-0 w-20 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                        style={{ filter: 'blur(8px)' }}
-                      />
-                    )}
-                  </button>
-                </motion.div>
-
-                <p className="text-center text-xs text-gray-400 mt-6">
-                  Accounts are provisioned by your administrator.
-                </p>
-              </form>
-            </motion.div>
-          </div>
-        </motion.div>
+      <div className="my-4 flex items-center gap-3">
+        <span className="h-px flex-1 bg-[#eaeaec]" />
+        <span className="text-[13px] text-[#8a8a8e]">or</span>
+        <span className="h-px flex-1 bg-[#eaeaec]" />
       </div>
-    </div>
+
+      {/* Placeholder for a future Telegram auth provider — nothing wired yet. */}
+      <button
+        type="button"
+        aria-disabled="true"
+        title="Telegram sign-in is not enabled yet"
+        className="flex h-12 w-full cursor-not-allowed items-center justify-center gap-2.5 rounded-xl bg-[#f4f4f5] text-[15px] font-semibold text-[#131316] transition-colors hover:bg-[#ebebec]"
+      >
+        <TelegramIcon className="h-5 w-5" />
+        Telegram
+      </button>
+
+      <p className="mt-6 text-[14px] text-[#8a8a8e]">
+        New user?{' '}
+        <Link
+          to="/register"
+          className="font-semibold text-[#131316] underline decoration-[#bcbcc0] underline-offset-4"
+        >
+          Sign Up
+        </Link>
+      </p>
+    </AuthShell>
   );
 }

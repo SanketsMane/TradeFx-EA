@@ -84,7 +84,7 @@ export default function AccountDetailPage() {
         <StatCard label="Balance" value={fmt(snapshot?.balance)} sub={snapshot ? 'latest snapshot' : 'no data yet'} />
         <StatCard label="Equity" value={fmt(snapshot?.equity)} sub={snapshot ? 'latest snapshot' : 'no data yet'} />
         <StatCard label="Open Positions" value={positions.length || (snapshot?.openPositions ?? '—')} sub="live" />
-        <StatCard label="Copy Events" value={events.length} sub="most recent" />
+        <StatCard label="Trades" value={events.length} sub="most recent" />
       </div>
 
       <Card className="mb-6">
@@ -137,7 +137,7 @@ export default function AccountDetailPage() {
       <Card>
         <div className="border-b border-gray-100 p-4 text-sm font-semibold text-gray-800">Recent copy activity</div>
         {events.length === 0 ? (
-          <EmptyState title="No copy events" description="This account has no recorded copy activity yet." />
+          <EmptyState title="No trades" description="This account has no recorded trade activity yet." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

@@ -1,4 +1,4 @@
-# Production stack for MoneyBank FX. Values come from a sibling .env file.
+# Production stack for TradeFx. Values come from a sibling .env file.
 services:
   postgres:
     image: postgres:16-alpine

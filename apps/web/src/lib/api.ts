@@ -1,4 +1,4 @@
-// API client for the Money Bank FX Trade Copier backend.
+// API client for the TradeFx Trade Copier backend.
 // Requests go through the Vite dev proxy (`/api` → http://localhost:3000).
 
 const API = '/api/v1';
@@ -10,7 +10,7 @@ const USER_KEY = 'tcp.user';
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-export type Role = 'SUPER_ADMIN' | 'ADMIN';
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'CUSTOMER';
 export type UserStatus = 'ACTIVE' | 'DISABLED';
 export type Platform = 'MT4' | 'MT5';
 export type AccountStatus = 'PROVISIONING' | 'CONNECTED' | 'DISCONNECTED' | 'ERROR';
@@ -626,4 +626,209 @@ export const settingsApi = {
       body: JSON.stringify(body),
     }),
   smtpClear: () => apiFetch<SmtpStatus>('/settings/smtp', { method: 'DELETE' }),
+};
+
+// ---------------------------------------------------------------------------
+// Public (no auth) — quote requests and self-service registration
+// ---------------------------------------------------------------------------
+
+/** Like `apiFetch`, but never attaches a token or bounces to /login on 401. */
+async function publicFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const res = await fetch(`${API}${path}`, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
+  });
+  if (!res.ok) throw new ApiError(res.status, await parseError(res));
+  if (res.status === 204) return undefined as T;
+  return (await res.json()) as T;
+}
+
+export type QuoteStatus = 'NEW' | 'IN_REVIEW' | 'QUOTED' | 'ACCEPTED' | 'DECLINED' | 'CLOSED';
+
+export interface QuoteRequestInput {
+  name: string;
+  email: string;
+  phone?: string;
+  /** Product slug from the catalogue, when the enquiry is about an Expert Advisor. */
+  productSlug?: string;
+  /** Service slug from the catalogue, when the enquiry is about a service. */
+  serviceSlug?: string;
+  broker?: string;
+  accountSize?: string;
+  message: string;
+}
+
+export interface QuoteRequest {
+  id: string;
+  reference: string;
+  productSlug: string | null;
+  serviceSlug: string | null;
+  broker: string | null;
+  accountSize: string | null;
+  message: string;
+  status: QuoteStatus;
+  /** Only ever set by an admin, and only visible to the requester. */
+  quotedNote: string | null;
+  quotedAt: string | null;
+  createdAt: string;
+}
+
+export const quotesApi = {
+  /** Open to logged-out visitors; the server links it to a user when one is signed in. */
+  submit: (input: QuoteRequestInput) =>
+    publicFetch<{ reference: string }>('/quotes', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+  /** The signed-in customer's own requests. */
+  mine: () => apiFetch<QuoteRequest[]>('/quotes/mine'),
+};
+
+export async function register(input: {
+  fullName: string;
+  email: string;
+  password: string;
+  phone?: string;
+}): Promise<AuthUser> {
+  const data = await publicFetch<{ accessToken: string; refreshToken: string; user: AuthUser }>(
+    '/auth/register',
+    { method: 'POST', body: JSON.stringify(input) },
+  );
+  storeSession(data);
+  return data.user;
+}
+
+// ---------------------------------------------------------------------------
+// Customer portal
+// ---------------------------------------------------------------------------
+export type LicenseStatus = 'UNASSIGNED' | 'ACTIVE' | 'SUSPENDED' | 'REVOKED' | 'EXPIRED';
+
+/**
+ * An Expert Advisor the customer owns. `code` is the 9-character licence they
+ * enter when linking a MetaTrader account.
+ */
+export interface EaLicense {
+  id: string;
+  code: string;
+  productSlug: string;
+  productName: string;
+  status: LicenseStatus;
+  issuedAt: string;
+  activatedAt: string | null;
+  expiresAt: string | null;
+  /** Set once the licence has been bound to one of the customer's accounts. */
+  linkedAccount: { id: string; label: string; login: string; platform: Platform } | null;
+}
+
+/** Headline numbers for one active Expert Advisor. All money as decimal strings. */
+export interface EaPerformance {
+  licenseId: string;
+  productName: string;
+  accountLabel: string;
+  /** ISO 4217 code for the trading account, e.g. USD. */
+  currency: string;
+  balance: string;
+  equity: string;
+  /** Today's return as a percentage of opening equity, e.g. 1.24 for +1.24%. */
+  dailyRoiPct: number;
+  dailyPnl: string;
+  totalPnl: string;
+  openPositions: number;
+  trades: number;
+  winRate: number;
+  lastTradeAt: string | null;
+}
+
+export interface PortalOverview {
+  activeBots: number;
+  linkedAccounts: number;
+  /** Currency the aggregate figures are reported in. */
+  currency: string;
+  totalEquity: string;
+  dailyPnl: string;
+  dailyRoiPct: number;
+  performance: EaPerformance[];
+}
+
+export interface BrokerOffer {
+  id: string;
+  name: string;
+  logo: string | null;
+  blurb: string;
+  /** Our affiliate link — the customer opens their account through this. */
+  signupUrl: string;
+  highlights: string[];
+}
+
+export const portalApi = {
+  overview: () => apiFetch<PortalOverview>('/portal/overview'),
+  licenses: () => apiFetch<EaLicense[]>('/portal/licenses'),
+  license: (id: string) => apiFetch<EaLicense>(`/portal/licenses/${id}`),
+  performance: (licenseId: string) =>
+    apiFetch<EaPerformance>(`/portal/licenses/${licenseId}/performance`),
+  /** The trade statement for one Expert Advisor. */
+  statement: (licenseId: string, limit = 100) =>
+    apiFetch<{ items: CopyEvent[]; total: number }>(
+      `/portal/licenses/${licenseId}/statement?limit=${limit}`,
+    ),
+  /** The customer's own MetaTrader accounts. */
+  accounts: () => apiFetch<AccountMini[]>('/portal/accounts'),
+  /**
+   * Bind a licence to a MetaTrader account. The server validates the code,
+   * provisions the account and attaches the Expert Advisor.
+   */
+  linkAccount: (input: {
+    licenseCode: string;
+    label: string;
+    login: string;
+    password: string;
+    server: string;
+    platform: Platform;
+  }) => apiFetch<AccountMini>('/portal/accounts', { method: 'POST', body: JSON.stringify(input) }),
+  unlinkAccount: (id: string) => apiFetch<void>(`/portal/accounts/${id}`, { method: 'DELETE' }),
+  brokers: () => apiFetch<BrokerOffer[]>('/portal/brokers'),
+};
+
+// ---------------------------------------------------------------------------
+// Mobile sign-in (one-time code by SMS)
+// ---------------------------------------------------------------------------
+export interface OtpRequestResult {
+  sent: true;
+  expiresInSeconds: number;
+  resendAfterSeconds: number;
+}
+
+/**
+ * Verification either signs you in, or tells us the number is new and needs a
+ * name before an account can be created.
+ */
+export type OtpVerifyResult =
+  | { status: 'SIGNED_IN'; user: AuthUser }
+  | { status: 'PROFILE_REQUIRED'; phone: string };
+
+export const otpApi = {
+  /**
+   * Always resolves the same way for a known and an unknown number — the API
+   * will not confirm whether a mobile has an account, so nothing here can be
+   * used to harvest the customer list.
+   */
+  request: (phone: string) =>
+    publicFetch<OtpRequestResult>('/auth/otp/request', {
+      method: 'POST',
+      body: JSON.stringify({ phone }),
+    }),
+
+  async verify(phone: string, code: string, fullName?: string): Promise<OtpVerifyResult> {
+    const data = await publicFetch<
+      | { status: 'SIGNED_IN'; accessToken: string; refreshToken: string; user: AuthUser }
+      | { status: 'PROFILE_REQUIRED'; phone: string }
+    >('/auth/otp/verify', {
+      method: 'POST',
+      body: JSON.stringify({ phone, code, ...(fullName ? { fullName } : {}) }),
+    });
+
+    if (data.status === 'PROFILE_REQUIRED') return data;
+    storeSession(data);
+    return { status: 'SIGNED_IN', user: data.user };
+  },
 };

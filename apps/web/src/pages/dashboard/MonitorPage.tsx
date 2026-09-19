@@ -86,7 +86,7 @@ export default function MonitorPage() {
     <>
       <PageHeader
         title="Live Monitor"
-        subtitle="Real-time copy activity streamed over WebSocket."
+        subtitle="Real-time trade activity streamed over WebSocket."
         actions={
           connected ? (
             <Badge tone="green">
@@ -102,8 +102,8 @@ export default function MonitorPage() {
         <Card>
           <EmptyState
             icon={<Activity className="h-10 w-10" />}
-            title="No copiers"
-            description="Create a copier first, then watch its copies stream here."
+            title="No EA masters"
+            description="Create a master first, then watch its trades stream here."
           />
         </Card>
       ) : (
@@ -132,17 +132,17 @@ export default function MonitorPage() {
 
           <Card>
             <div className="flex items-center gap-2 border-b border-gray-100 p-4 text-sm font-semibold text-gray-800">
-              <Activity className="h-4 w-4 text-brand-600" /> Copy Log
+              <Activity className="h-4 w-4 text-brand-600" /> Trade Log
               <span className="ml-auto text-xs font-normal text-gray-400">{events.length} events</span>
             </div>
             {events.length === 0 ? (
               <EmptyState
                 icon={<Activity className="h-10 w-10" />}
-                title="Waiting for copy activity"
+                title="Waiting for trade activity"
                 description={
                   runtime?.simulationEnabled
                     ? 'When the source trades, copies appear here in real time. Use “Simulate trade” to try it.'
-                    : 'When the source account places a trade, the copy to each receiver appears here in real time.'
+                    : 'When the master places a trade, the matching trade on each client account appears here in real time.'
                 }
               />
             ) : (

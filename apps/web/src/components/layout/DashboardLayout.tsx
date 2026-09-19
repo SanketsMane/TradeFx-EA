@@ -98,7 +98,7 @@ function UserMenu() {
         <div className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
           <div className="border-b border-gray-100 px-4 py-3">
             <div className="truncate text-sm font-medium text-gray-800">{user?.email}</div>
-            <div className="text-xs text-brand-600">{user?.role}</div>
+            <div className="text-xs text-brand-700">{user?.role}</div>
           </div>
           <button
             onClick={() => {
@@ -155,11 +155,11 @@ export default function DashboardLayout() {
       ],
     },
     {
-      label: 'Copier',
+      label: 'Expert Advisors',
       items: [
-        { to: '/dashboard/copiers', label: 'Copiers', icon: Copy },
+        { to: '/dashboard/copiers', label: 'EA Masters', icon: Copy },
         { to: '/dashboard/monitor', label: 'Live Monitor', icon: Activity },
-        { to: '/dashboard/history', label: 'Copy History', icon: History },
+        { to: '/dashboard/history', label: 'Trade History', icon: History },
         { to: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
       ],
     },
@@ -195,10 +195,16 @@ export default function DashboardLayout() {
             )}
           >
             <div className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="Money Bank FX" className="h-9 w-9 shrink-0 object-contain" />
-              <span className={cn('text-[15px] font-bold text-gray-900', collapsed && 'md:hidden')}>
-                Money Bank FX
-              </span>
+              <img
+                src="/logo.png"
+                alt="TradeFx"
+                className={cn('hidden h-8 w-8 shrink-0 object-contain', collapsed && 'md:block')}
+              />
+              <img
+                src="/logo-dark.webp"
+                alt="TradeFx"
+                className={cn('h-7 w-auto shrink-0 object-contain', collapsed && 'md:hidden')}
+              />
             </div>
             <button
               className="text-gray-400 md:hidden"
@@ -280,8 +286,7 @@ export default function DashboardLayout() {
               {collapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
             </button>
             <div className="flex items-center gap-2 md:hidden">
-              <img src="/logo.png" alt="" className="h-7 w-7 object-contain" />
-              <span className="font-bold text-gray-900">Money Bank FX</span>
+              <img src="/logo-dark.webp" alt="TradeFx" className="h-6 w-auto object-contain" />
             </div>
             <div className="ml-auto flex items-center gap-1">
               <NotificationBell />
@@ -295,7 +300,7 @@ export default function DashboardLayout() {
 
           {/* Footer — shown at the bottom of every dashboard page */}
           <footer className="border-t border-gray-100 px-4 py-4 text-center text-xs text-gray-400 sm:px-6">
-            <div>Money Bank FX · v{__APP_VERSION__}</div>
+            <div>TradeFx · v{__APP_VERSION__}</div>
             <div>
               Developed by <span className="font-medium text-gray-500">Sanket Patil</span> · 9270507170
             </div>

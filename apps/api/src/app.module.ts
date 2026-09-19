@@ -8,6 +8,7 @@ import { AuditModule } from './common/audit/audit.module';
 import { CryptoModule } from './common/crypto/crypto.module';
 import { SettingsModule } from './settings/settings.module';
 import { MailModule } from './mail/mail.module';
+import { SmsModule } from './sms/sms.module';
 import { CopierModule } from './copier/copier.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminsModule } from './admins/admins.module';
@@ -16,6 +17,9 @@ import { CopiersModule } from './copiers/copiers.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReportsModule } from './reports/reports.module';
+import { QuotesModule } from './quotes/quotes.module';
+import { LicensesModule } from './licenses/licenses.module';
+import { PortalModule } from './portal/portal.module';
 import { HealthModule } from './health/health.module';
 import { SeedModule } from './seed/seed.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -34,6 +38,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     CryptoModule,
     SettingsModule,
     MailModule,
+    SmsModule,
     CopierModule,
     AuthModule,
     AdminsModule,
@@ -42,6 +47,9 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     MonitoringModule,
     NotificationsModule,
     ReportsModule,
+    QuotesModule,
+    LicensesModule,
+    PortalModule,
     HealthModule,
     SeedModule,
   ],

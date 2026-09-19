@@ -1,11 +1,26 @@
 import { type ReactElement } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
+import ProductsPage from './pages/ProductsPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import ServicesPage from './pages/ServicesPage';
+import HowItWorksPage from './pages/HowItWorksPage';
+import ContactPage from './pages/ContactPage';
+import QuotePage from './pages/QuotePage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import NotFoundPage from './pages/NotFoundPage';
+import ScrollToTop from './components/ScrollToTop';
 import DashboardLayout from './components/layout/DashboardLayout';
+import PortalLayout from './components/layout/PortalLayout';
+import PortalOverviewPage from './pages/portal/PortalOverviewPage';
+import MyExpertAdvisorsPage from './pages/portal/MyExpertAdvisorsPage';
+import BotDetailPage from './pages/portal/BotDetailPage';
+import TradingAccountsPage from './pages/portal/TradingAccountsPage';
+import BrokerAccountPage from './pages/portal/BrokerAccountPage';
+import MyQuotesPage from './pages/portal/MyQuotesPage';
 import OverviewPage from './pages/dashboard/OverviewPage';
 import AccountsPage from './pages/dashboard/AccountsPage';
 import AccountDetailPage from './pages/dashboard/AccountDetailPage';
@@ -23,6 +38,13 @@ function RequireAuth({ children }: { children: ReactElement }) {
   return isAuthenticated() ? children : <Navigate to="/login" replace />;
 }
 
+/** Staff only. A customer who lands on /dashboard is sent to their own portal. */
+function RequireStaff({ children }: { children: ReactElement }) {
+  const role = getUser()?.role;
+  if (!isAuthenticated()) return <Navigate to="/login" replace />;
+  return role === 'CUSTOMER' ? <Navigate to="/app" replace /> : children;
+}
+
 function RequireSuperAdmin({ children }: { children: ReactElement }) {
   return getUser()?.role === 'SUPER_ADMIN' ? children : <Navigate to="/dashboard" replace />;
 }
@@ -30,17 +52,45 @@ function RequireSuperAdmin({ children }: { children: ReactElement }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
+        {/* ---- Public marketing site ---- */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:slug" element={<ProductDetailPage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/how-it-works" element={<HowItWorksPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/quote" element={<QuotePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        {/* ---- Customer portal ---- */}
+        <Route
+          path="/app"
+          element={
+            <RequireAuth>
+              <PortalLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<PortalOverviewPage />} />
+          <Route path="bots" element={<MyExpertAdvisorsPage />} />
+          <Route path="bots/:id" element={<BotDetailPage />} />
+          <Route path="accounts" element={<TradingAccountsPage />} />
+          <Route path="broker" element={<BrokerAccountPage />} />
+          <Route path="quotes" element={<MyQuotesPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+
+        {/* ---- Staff dashboard ---- */}
         <Route
           path="/dashboard"
           element={
-            <RequireAuth>
+            <RequireStaff>
               <DashboardLayout />
-            </RequireAuth>
+            </RequireStaff>
           }
         >
           <Route index element={<OverviewPage />} />

@@ -33,7 +33,7 @@ export function CreateCopierDialog({
     setLoading(true);
     try {
       await copierApi.create(name.trim(), sourceId);
-      toast('Copier created', 'success');
+      toast('EA master created', 'success');
       setName('');
       setSourceId('');
       onCreated();
@@ -49,7 +49,7 @@ export function CreateCopierDialog({
     <Dialog
       open={open}
       onClose={onClose}
-      title="Create Copier"
+      title="Create EA Master"
       description="Pick the source account whose trades will be copied to receivers."
       footer={
         <>
@@ -63,8 +63,8 @@ export function CreateCopierDialog({
       }
     >
       <div className="space-y-4">
-        <Field label="Copier name">
-          <Input placeholder="e.g. MBFX Main Copier" value={name} onChange={(e) => setName(e.target.value)} />
+        <Field label="Master name">
+          <Input placeholder="e.g. TradeFx Scalper Master" value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
         <Field label="Source account (master)" hint="The account whose trades are copied.">
           {available.length === 0 ? (

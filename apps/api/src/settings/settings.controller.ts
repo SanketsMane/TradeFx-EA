@@ -92,9 +92,9 @@ export class SettingsController {
 
     const sent = await this.mail.sendWith(cfg, {
       to: dto.to,
-      subject: 'Money Bank FX — SMTP test email',
-      text: 'This is a test email from Money Bank FX. Your SMTP settings are working.',
-      html: '<p>This is a test email from <strong>Money Bank FX</strong>. Your SMTP settings are working.</p>',
+      subject: 'TradeFx — SMTP test email',
+      text: 'This is a test email from TradeFx. Your SMTP settings are working.',
+      html: '<p>This is a test email from <strong>TradeFx</strong>. Your SMTP settings are working.</p>',
     });
     await this.audit.log({
       userId,

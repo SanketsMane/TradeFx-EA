@@ -1,5 +1,12 @@
-// MoneyBank FX — Trade Copier Platform schema
-// Model: flat Accounts + Copier configs (source → receivers), TradersConnect-style.
+// TradeFx — Expert Advisor trading platform schema.
+//
+// Two halves. The execution engine (Account / CopierConfig / Subscription /
+// CopyEvent) is internal plumbing: one master account running an Expert
+// Advisor, fanned out to client accounts. The commercial side (BotLicense /
+// QuoteRequest / BrokerOffer) is what a customer sees.
+//
+// Naming note: the engine tables keep their original names. Customer-facing
+// text must never use them — the product is an Expert Advisor, not a copier.
 
 generator client {
   provider = "prisma-client-js"
@@ -13,6 +20,8 @@ datasource db {
 enum Role {
   SUPER_ADMIN
   ADMIN
+  /// Self-registered client. Sees only their own licences and accounts.
+  CUSTOMER
 }
 
 enum UserStatus {
@@ -22,24 +31,24 @@ enum UserStatus {
 
 /// Singleton row (id = "singleton") holding platform-wide config.
 model PlatformSetting {
-  id                    String   @id @default("singleton")
+  id                    String  @id @default("singleton")
   metaapiTokenEncrypted String?
-  metaapiRegion         String   @default("new-york")
+  metaapiRegion         String  @default("new-york")
 
   // ---- Email / SMTP (app password encrypted at rest) ----
   smtpHost              String?
   smtpPort              Int?
-  smtpSecure            Boolean  @default(false)
+  smtpSecure            Boolean   @default(false)
   smtpUser              String?
   smtpPasswordEncrypted String?
   smtpFromName          String?
   smtpFromEmail         String?
   alertEmail            String?
-  alertsEnabled         Boolean  @default(true)
+  alertsEnabled         Boolean   @default(true)
   smtpUpdatedAt         DateTime?
 
-  updatedById           String?
-  updatedAt             DateTime @updatedAt
+  updatedById String?
+  updatedAt   DateTime @updatedAt
 
   @@map("platform_settings")
 }
@@ -51,6 +60,11 @@ model User {
   role         Role
   status       UserStatus @default(ACTIVE)
 
+  // Collected at self-registration; staff accounts leave them null.
+  fullName String?
+  /// Also a sign-in identity (OTP), so it must be unique. Null for staff.
+  phone    String? @unique
+
   hashedRefreshToken String?
 
   // Self-service password reset (forgot-password): argon2 hash of a one-time token.
@@ -58,17 +72,24 @@ model User {
   resetTokenExpiresAt DateTime?
 
   createdById  String?
-  createdBy    User?      @relation("UserCreator", fields: [createdById], references: [id])
-  createdUsers User[]     @relation("UserCreator")
+  createdBy    User?   @relation("UserCreator", fields: [createdById], references: [id])
+  createdUsers User[]  @relation("UserCreator")
 
-  auditLogs      AuditLog[]
-  notifications  Notification[]
+  auditLogs       AuditLog[]
+  notifications   Notification[]
   createdAccounts Account[]      @relation("AccountCreator")
   createdCopiers  CopierConfig[] @relation("CopierCreator")
   sessions        Session[]
 
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  // Customer side
+  ownedAccounts  Account[]      @relation("AccountOwner")
+  licenses       BotLicense[]
+  quoteRequests  QuoteRequest[] @relation("QuoteRequester")
+  quotesAnswered QuoteRequest[] @relation("QuoteResponder")
+  licensesIssued BotLicense[]   @relation("LicenseIssuer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("users")
 }
@@ -144,48 +165,60 @@ model Account {
   /// Broker position-accounting mode, captured from MetaApi: 'netting' | 'hedging' | null.
   marginMode        String?
 
-  createdById       String
-  createdBy         User          @relation("AccountCreator", fields: [createdById], references: [id])
+  /// Deposit currency as the broker reports it — client figures are shown in it.
+  currency String @default("USD")
+
+  createdById String
+  createdBy   User   @relation("AccountCreator", fields: [createdById], references: [id])
+
+  /// The customer this account belongs to. Null for master/house accounts.
+  ownerId String?
+  owner   User?       @relation("AccountOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  license BotLicense? @relation("LicenseAccount")
 
   sourceForConfig       CopierConfig?  @relation("ConfigSource")
   receiverSubscriptions Subscription[] @relation("ReceiverAccount")
 
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  deletedAt         DateTime?     // soft-delete: non-null = removed (recoverable)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // soft-delete: non-null = removed (recoverable)
 
   @@index([deletedAt])
+  @@index([ownerId])
   @@map("accounts")
 }
 
 /// A copier: one SOURCE account that many RECEIVER accounts copy from.
 /// Maps to a CopyFactory strategy created for the source account.
 model CopierConfig {
-  id                    String       @id @default(uuid())
+  id                    String  @id @default(uuid())
   name                  String
-  sourceAccountId       String       @unique
-  sourceAccount         Account      @relation("ConfigSource", fields: [sourceAccountId], references: [id], onDelete: Cascade)
+  /// Catalogue slug this master runs, e.g. "scalper". Set it and customer
+  /// licences for that product attach their accounts here automatically.
+  productSlug           String? @unique
+  sourceAccountId       String  @unique
+  sourceAccount         Account @relation("ConfigSource", fields: [sourceAccountId], references: [id], onDelete: Cascade)
   copyfactoryStrategyId String
-  enabled               Boolean      @default(true)
+  enabled               Boolean @default(true)
 
-  createdById           String
-  createdBy             User         @relation("CopierCreator", fields: [createdById], references: [id])
+  createdById String
+  createdBy   User   @relation("CopierCreator", fields: [createdById], references: [id])
 
-  subscriptions         Subscription[]
+  subscriptions Subscription[]
 
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("copier_configs")
 }
 
 /// A receiver in a copier config (maps to a CopyFactory subscriber + subscription).
 model Subscription {
-  id                      String         @id @default(uuid())
+  id                      String       @id @default(uuid())
   copierConfigId          String
-  copierConfig            CopierConfig   @relation(fields: [copierConfigId], references: [id], onDelete: Cascade)
+  copierConfig            CopierConfig @relation(fields: [copierConfigId], references: [id], onDelete: Cascade)
   receiverAccountId       String
-  receiverAccount         Account        @relation("ReceiverAccount", fields: [receiverAccountId], references: [id], onDelete: Cascade)
+  receiverAccount         Account      @relation("ReceiverAccount", fields: [receiverAccountId], references: [id], onDelete: Cascade)
   copyfactorySubscriberId String
 
   sizingMode    SizingMode     @default(MULTIPLIER)
@@ -209,8 +242,8 @@ model Subscription {
   tradeWindowStart Int?
   tradeWindowEnd   Int?
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([copierConfigId, receiverAccountId])
   @@index([copierConfigId])
@@ -304,4 +337,142 @@ model Notification {
   @@index([userId, readAt])
   @@index([userId, createdAt])
   @@map("notifications")
+}
+
+// ---------------------------------------------------------------------------
+// Commerce — what the customer buys and sees
+// ---------------------------------------------------------------------------
+
+enum LicenseStatus {
+  /// Issued and paid for, but not yet bound to a trading account.
+  UNASSIGNED
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+/// Entitlement to run one Expert Advisor on one trading account.
+///
+/// `code` is the 9-character string the customer types when linking an
+/// account. It is generated from a Crockford-style alphabet (no I, L, O, U,
+/// no 0/1) so codes read aloud or copied off a screen cannot be garbled.
+model BotLicense {
+  id     String @id @default(uuid())
+  code   String @unique
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Catalogue slug, e.g. "scalper". The product list lives in code, not the DB.
+  productSlug String
+  /// Name captured at issue time, so renaming a product never rewrites history.
+  productName String
+
+  status LicenseStatus @default(UNASSIGNED)
+
+  /// The account this licence runs on — one licence, one account.
+  linkedAccountId String?  @unique
+  linkedAccount   Account? @relation("LicenseAccount", fields: [linkedAccountId], references: [id], onDelete: SetNull)
+  /// The receiver subscription that actually executes for this licence.
+  subscriptionId  String?  @unique
+
+  issuedById  String?
+  issuedBy    User?     @relation("LicenseIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+  issuedAt    DateTime  @default(now())
+  activatedAt DateTime?
+  /// Null means perpetual.
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@map("bot_licenses")
+}
+
+enum QuoteStatus {
+  NEW
+  IN_REVIEW
+  QUOTED
+  ACCEPTED
+  DECLINED
+  CLOSED
+}
+
+/// A request for a price. Prices are never shown in the UI — an advisor reads
+/// the request and replies out of band, then records the outcome here.
+model QuoteRequest {
+  id        String @id @default(uuid())
+  /// Short human reference quoted back to the customer, e.g. "TFX-4821".
+  reference String @unique
+
+  /// Set when the requester was signed in; anonymous enquiries leave it null.
+  userId String?
+  user   User?   @relation("QuoteRequester", fields: [userId], references: [id], onDelete: SetNull)
+
+  name  String
+  email String
+  phone String?
+
+  /// Exactly one of these is set — a catalogue product or a service.
+  productSlug String?
+  serviceSlug String?
+
+  broker      String?
+  accountSize String?
+  message     String
+
+  status     QuoteStatus @default(NEW)
+  /// What the advisor told the customer. Never a machine-readable price: the
+  /// figure itself is sent by email, so nothing renders a price in the UI.
+  quotedNote String?
+  quotedAt   DateTime?
+  quotedById String?
+  quotedBy   User?       @relation("QuoteResponder", fields: [quotedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@map("quote_requests")
+}
+
+/// A broker we refer clients to. `signupUrl` carries our affiliate parameters.
+model BrokerOffer {
+  id         String   @id @default(uuid())
+  name       String
+  logo       String?
+  blurb      String
+  signupUrl  String
+  highlights String[] @default([])
+  sortOrder  Int      @default(0)
+  published  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("broker_offers")
+}
+
+/// A one-time code sent to a mobile number.
+///
+/// The code is stored only as an argon2 hash — a leaked database must not
+/// hand over live codes. Challenges are single-use, expire quickly, and cap
+/// the number of guesses.
+model OtpChallenge {
+  id         String    @id @default(uuid())
+  /// Normalised national number (digits only), matching what the SMS gateway wants.
+  phone      String
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  /// Kept for abuse investigation, not for rate limiting (that is in-request).
+  ip         String?
+  createdAt  DateTime  @default(now())
+
+  @@index([phone, createdAt])
+  @@index([expiresAt])
+  @@map("otp_challenges")
 }

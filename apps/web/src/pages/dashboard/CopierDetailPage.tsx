@@ -96,7 +96,7 @@ export default function CopierDetailPage() {
   };
 
   if (loading) return <LoadingBlock />;
-  if (error || !config) return <ErrorState message={error ?? 'Copier not found'} onRetry={reload} />;
+  if (error || !config) return <ErrorState message={error ?? 'EA master not found'} onRetry={reload} />;
 
   return (
     <>
@@ -160,7 +160,7 @@ export default function CopierDetailPage() {
           <EmptyState
             icon={<Users className="h-10 w-10" />}
             title="No receivers"
-            description="Add a receiver account to start mirroring this source's trades."
+            description="Add a client account to start mirroring this master's trades."
             action={
               <Button onClick={() => setAddOpen(true)}>
                 <Plus className="h-4 w-4" /> Add Receiver

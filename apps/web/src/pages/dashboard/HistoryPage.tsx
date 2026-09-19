@@ -96,7 +96,7 @@ export default function HistoryPage() {
   return (
     <>
       <PageHeader
-        title="Copy History"
+        title="Trade History"
         subtitle="Every copied trade across your copiers."
         actions={
           <Button variant="secondary" onClick={exportCsv} disabled={total === 0} loading={exporting}>
@@ -138,7 +138,7 @@ export default function HistoryPage() {
         ) : error ? (
           <ErrorState message={error} onRetry={load} />
         ) : items.length === 0 ? (
-          <EmptyState icon={<History className="h-10 w-10" />} title="No copy events" description="Nothing matches these filters yet." />
+          <EmptyState icon={<History className="h-10 w-10" />} title="No trades" description="Nothing matches these filters yet." />
         ) : (
           <>
             <div className="overflow-x-auto">

@@ -84,7 +84,7 @@ export function SessionsDialog({ open, onClose }: { open: boolean; onClose: () =
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium text-gray-800">
                   {s.userAgent || 'Unknown device'}
-                  {s.current && <span className="ml-2 text-xs font-normal text-brand-600">This device</span>}
+                  {s.current && <span className="ml-2 text-xs font-normal text-brand-700">This device</span>}
                 </div>
                 <div className="text-xs text-gray-400">
                   {s.ip ? `${s.ip} · ` : ''}active {new Date(s.lastUsedAt).toLocaleString()}

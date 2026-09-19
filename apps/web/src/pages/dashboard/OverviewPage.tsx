@@ -70,7 +70,7 @@ export default function OverviewPage() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Accounts" value={accounts.length} sub={`${connected} connected`} />
-        <StatCard label="Copiers" value={copiers.length} sub={`${activeCopiers} active`} />
+        <StatCard label="EA Masters" value={copiers.length} sub={`${activeCopiers} active`} />
         <StatCard label="Receivers" value={receivers} sub="across all copiers" />
         <StatCard
           label="Realized P/L"
@@ -134,7 +134,7 @@ export default function OverviewPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-400">
-                    <th className="px-4 py-2.5">Copier</th>
+                    <th className="px-4 py-2.5">Master</th>
                     <th className="px-4 py-2.5">Symbol</th>
                     <th className="px-4 py-2.5">Action</th>
                     <th className="px-4 py-2.5 text-right">P/L</th>

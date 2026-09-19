@@ -49,7 +49,12 @@ export class AccountsService {
     return this.config.get<number>('MAX_ACCOUNTS', 50);
   }
 
-  async create(dto: CreateAccountDto, actor: Actor): Promise<AccountView> {
+  /**
+   * `ownerId` marks the customer an account belongs to. Staff-created house
+   * accounts leave it null; accounts linked from the customer portal set it,
+   * which is what scopes the portal's queries.
+   */
+  async create(dto: CreateAccountDto, actor: Actor, ownerId?: string): Promise<AccountView> {
     const actorId = actor.sub;
     const count = await this.prisma.account.count({ where: { ...ownedBy(actor), deletedAt: null } });
     if (count >= this.maxAccounts) {
@@ -75,6 +80,7 @@ export class AccountsService {
           encryptedPassword: this.crypto.encrypt(dto.password),
           status: AccountStatus.CONNECTED,
           createdById: actorId,
+          ownerId: ownerId ?? null,
         },
         select: ACCOUNT_VIEW,
       });

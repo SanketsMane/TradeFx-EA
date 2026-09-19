@@ -1,9 +1,9 @@
 /**
  * Production email templates — table-based, inline-CSS, email-client safe
  * (Gmail, Apple Mail, Outlook, Yahoo, mobile). Shared design system:
- * #F8FAFC canvas, centered 600px white card, Inter/system fonts, brand-green
- * accent + CTAs. Header shows the hosted Money Bank FX logo when an app URL is
- * available, and degrades to a green "M" monogram when images are blocked.
+ * #F8FAFC canvas, centered 600px white card, Inter/system fonts, brand-orange
+ * accent + CTAs. Header shows the hosted TradeFx logo when an app URL is
+ * available, and degrades to an orange "T" monogram when images are blocked.
  */
 
 export interface RenderedEmail {
@@ -23,11 +23,11 @@ const C = {
   bg: '#F1F5F9',
   card: '#FFFFFF',
   panel: '#F8FAFC',
-  green: '#1F7357', // brand-600
-  greenHover: '#1A5C47', // brand-700
-  greenText: '#15803D',
-  greenBg: '#ECFDF5',
-  greenBorder: '#BBF7D0',
+  brand: '#E35728', // brand-600
+  brandHover: '#B8431B', // brand-700
+  brandText: '#B8431B', // AA-contrast orange for text on light fills
+  brandBg: '#FFF5F1', // brand-50
+  brandBorder: '#FFCDB8', // brand-200
   amber: '#B45309',
   amberBg: '#FFFBEB',
   amberBorder: '#FDE68A',
@@ -66,32 +66,32 @@ function spacer(h: number): string {
 }
 
 /**
- * Brand lockup: hosted logo (when available) + wordmark. Falls back to a green
- * "M" monogram so the brand always renders even with images disabled.
+ * Brand lockup: hosted logo (when available) + wordmark. Falls back to an orange
+ * "T" monogram so the brand always renders even with images disabled.
  */
 function brandLockup(logoUrl: string | null): string {
   const mark = logoUrl
-    ? `<img src="${esc(logoUrl)}" width="40" height="40" alt="Money Bank FX" style="display:block;width:40px;height:40px;border:0;outline:none;" />`
+    ? `<img src="${esc(logoUrl)}" width="40" height="40" alt="TradeFx" style="display:block;width:40px;height:40px;border:0;outline:none;" />`
     : `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-        <td align="center" valign="middle" width="40" height="40" style="width:40px;height:40px;background:${C.green};border-radius:11px;color:#fff;font-family:${FONT};font-size:22px;font-weight:700;text-align:center;line-height:40px;">M</td>
+        <td align="center" valign="middle" width="40" height="40" style="width:40px;height:40px;background:${C.brand};border-radius:11px;color:#fff;font-family:${FONT};font-size:22px;font-weight:700;text-align:center;line-height:40px;">T</td>
       </tr></table>`;
   return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>
     <td valign="middle" style="padding-right:12px;">${mark}</td>
-    <td valign="middle" style="font-family:${FONT};font-size:20px;font-weight:700;color:${C.text};letter-spacing:-0.02em;">Money Bank&nbsp;FX</td>
+    <td valign="middle" style="font-family:${FONT};font-size:20px;font-weight:700;color:${C.text};letter-spacing:-0.02em;">TradeFx</td>
   </tr></table>`;
 }
 
-/** Bulletproof brand-green CTA button (with Outlook VML fallback). */
+/** Bulletproof brand-orange CTA button (with Outlook VML fallback). */
 function button(label: string, href: string): string {
   const safeHref = esc(href || '#');
-  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta" style="margin:0 auto;"><tr><td align="center" bgcolor="${C.green}" style="border-radius:12px;">
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" class="cta" style="margin:0 auto;"><tr><td align="center" bgcolor="${C.brand}" style="border-radius:12px;">
     <!--[if mso]>
-    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${safeHref}" style="height:52px;v-text-anchor:middle;width:300px;" arcsize="23%" strokecolor="${C.green}" fillcolor="${C.green}">
+    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${safeHref}" style="height:52px;v-text-anchor:middle;width:300px;" arcsize="23%" strokecolor="${C.brand}" fillcolor="${C.brand}">
     <w:anchorlock/><center style="color:#ffffff;font-family:${FONT};font-size:16px;font-weight:600;">${esc(label)}&nbsp;&rarr;</center>
     </v:roundrect>
     <![endif]-->
     <!--[if !mso]><!-- -->
-    <a href="${safeHref}" target="_blank" class="btn" style="display:inline-block;background:${C.green};color:#ffffff;font-family:${FONT};font-size:16px;font-weight:600;line-height:22px;text-decoration:none;padding:15px 32px;border-radius:12px;mso-padding-alt:0;">${esc(label)}&nbsp;<span style="color:#ffffff;">&rarr;</span></a>
+    <a href="${safeHref}" target="_blank" class="btn" style="display:inline-block;background:${C.brand};color:#ffffff;font-family:${FONT};font-size:16px;font-weight:600;line-height:22px;text-decoration:none;padding:15px 32px;border-radius:12px;mso-padding-alt:0;">${esc(label)}&nbsp;<span style="color:#ffffff;">&rarr;</span></a>
     <!--<![endif]-->
   </td></tr></table>`;
 }
@@ -123,14 +123,14 @@ function shell(preheader: string, inner: string): string {
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="color-scheme" content="light only" />
 <meta name="supported-color-schemes" content="light" />
-<title>Money Bank FX</title>
+<title>TradeFx</title>
 <!--[if mso]><style>* { font-family: Arial, Helvetica, sans-serif !important; }</style><![endif]-->
 <style>
   body { margin:0; padding:0; background:${C.bg}; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
   table { border-collapse:collapse; }
   img { border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; }
   a { text-decoration:none; }
-  .btn:hover { background:${C.greenHover} !important; }
+  .btn:hover { background:${C.brandHover} !important; }
   @media only screen and (max-width:600px) {
     .card { width:100% !important; border-radius:0 !important; border-left:0 !important; border-right:0 !important; }
     .px { padding-left:22px !important; padding-right:22px !important; }
@@ -167,23 +167,23 @@ function footer(url: string | null): string {
   const linkRow = url
     ? `${spacer(14)}
        <tr><td align="center" style="font-family:${FONT};font-size:13px;color:${C.small};">
-         <a href="${esc(url)}" target="_blank" style="color:${C.green};font-weight:600;">${esc(url.replace(/^https?:\/\//, ''))}</a>
+         <a href="${esc(url)}" target="_blank" style="color:${C.brand};font-weight:600;">${esc(url.replace(/^https?:\/\//, ''))}</a>
        </td></tr>`
     : '';
   return `${divider(32, 20)}
-  <tr><td align="center" style="font-family:${FONT};font-size:14px;font-weight:700;color:${C.text};">Money Bank FX</td></tr>
-  <tr><td align="center" style="font-family:${FONT};font-size:12px;color:${C.footer};padding-top:2px;">MT4 &amp; MT5 Trade Copier Platform</td></tr>
+  <tr><td align="center" style="font-family:${FONT};font-size:14px;font-weight:700;color:${C.text};">TradeFx</td></tr>
+  <tr><td align="center" style="font-family:${FONT};font-size:12px;color:${C.footer};padding-top:2px;">MT4 &amp; MT5 Expert Advisor Platform</td></tr>
   ${linkRow}
   ${spacer(14)}
   <tr><td align="center" style="font-family:${FONT};font-size:12px;color:${C.footer};">This is an automated message — please do not reply.</td></tr>
-  <tr><td align="center" style="font-family:${FONT};font-size:12px;color:${C.footer};padding-top:4px;">&copy; 2026 Money Bank FX. All rights reserved.</td></tr>`;
+  <tr><td align="center" style="font-family:${FONT};font-size:12px;color:${C.footer};padding-top:4px;">&copy; 2026 TradeFx. All rights reserved.</td></tr>`;
 }
 
 /** Success/hero icon: ring + big check. */
 function heroCheck(): string {
   return `<tr><td align="center" style="padding:12px 0 18px;">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>
-      <td valign="middle" align="center" width="84" height="84" style="width:84px;height:84px;background:${C.greenBg};border-radius:42px;text-align:center;font-family:${FONT};font-size:40px;line-height:84px;color:${C.green};">&#10003;</td>
+      <td valign="middle" align="center" width="84" height="84" style="width:84px;height:84px;background:${C.brandBg};border-radius:42px;text-align:center;font-family:${FONT};font-size:40px;line-height:84px;color:${C.brand};">&#10003;</td>
     </tr></table>
   </td></tr>`;
 }
@@ -209,12 +209,12 @@ function greeting(lines: string): string {
 /** Credentials card with email + password rows. */
 function credentialsCard(email: string, password: string): string {
   const emailRow = iconRow(
-    badge('&#9993;', { size: 44, bg: C.greenBg, color: C.green, fs: 20 }),
+    badge('&#9993;', { size: 44, bg: C.brandBg, color: C.brand, fs: 20 }),
     `<div style="font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:${C.small};padding-bottom:3px;">Email</div>
      <div style="font-size:15px;font-weight:600;color:${C.text};word-break:break-all;">${esc(email)}</div>`,
   );
   const pwRow = iconRow(
-    badge('&#128273;', { size: 44, bg: C.greenBg, color: C.green, fs: 19 }),
+    badge('&#128273;', { size: 44, bg: C.brandBg, color: C.brand, fs: 19 }),
     `<div style="font-size:12px;text-transform:uppercase;letter-spacing:0.04em;color:${C.small};padding-bottom:3px;">Temporary password</div>
      <div style="font-size:16px;font-weight:700;color:${C.text};font-family:${MONO};letter-spacing:0.02em;">${esc(password)}</div>`,
   );
@@ -245,13 +245,13 @@ function detailsCard(rows: Array<[string, string]>): string {
   </td></tr>`;
 }
 
-/** Green "For your security" notice. */
+/** Brand-tinted "For your security" notice. */
 function securityNotice(): string {
   return `<tr><td style="padding-top:4px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.greenBg};border:1px solid ${C.greenBorder};border-radius:12px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.brandBg};border:1px solid ${C.brandBorder};border-radius:12px;">
       <tr><td style="padding:15px 18px;">${iconRow(
-        badge('&#128737;', { size: 38, bg: '#D1FAE5', color: C.green, fs: 17 }),
-        `<div style="font-family:${FONT};font-size:14px;font-weight:700;color:${C.greenText};padding-bottom:2px;">Keep your account secure</div>
+        badge('&#128737;', { size: 38, bg: '#FFE7DD', color: C.brand, fs: 17 }),
+        `<div style="font-family:${FONT};font-size:14px;font-weight:700;color:${C.brandText};padding-bottom:2px;">Keep your account secure</div>
          <div style="font-family:${FONT};font-size:13px;line-height:19px;color:#3F6212;">Change this temporary password right after you sign in, and never share it with anyone.</div>`,
         14,
       )}</td></tr>
@@ -280,7 +280,7 @@ export function resetEmail(p: { email: string; password: string; url: string | n
   const inner = `
     ${header(logoOf(p.url))}
     ${heroCheck()}
-    ${heading('Your password has been reset', 'An administrator has reset the password for your<br/>Money Bank FX account.')}
+    ${heading('Your password has been reset', 'An administrator has reset the password for your<br/>TradeFx account.')}
     ${divider(28, 24)}
     ${greeting(`Hello,<br/>Your account credentials have been updated. Use the temporary password below to sign in.`)}
     ${spacer(18)}
@@ -299,11 +299,11 @@ export function resetEmail(p: { email: string; password: string; url: string | n
     ${footer(p.url)}
   `;
   return {
-    subject: 'Your Money Bank FX password has been reset',
-    html: shell('An administrator reset your Money Bank FX password. Sign in with your new temporary password.', inner),
+    subject: 'Your TradeFx password has been reset',
+    html: shell('An administrator reset your TradeFx password. Sign in with your new temporary password.', inner),
     text:
       `Your password has been reset\n\n` +
-      `An administrator has reset the password for your Money Bank FX account.\n\n` +
+      `An administrator has reset the password for your TradeFx account.\n\n` +
       `Email: ${p.email}\nTemporary password: ${p.password}\n\n` +
       (p.url ? `Sign in: ${signIn}\n\n` : '') +
       `For your security, change this temporary password right after you sign in.\n\n` +
@@ -316,7 +316,7 @@ export function inviteEmail(p: { email: string; password: string; url: string | 
   const inner = `
     ${header(logoOf(p.url))}
     ${heroCheck()}
-    ${heading('Welcome to Money Bank FX', 'An administrator account has been created for you.')}
+    ${heading('Welcome to TradeFx', 'An administrator account has been created for you.')}
     ${divider(28, 24)}
     ${greeting(`Hello,<br/>Your administrator account is ready. Sign in with the temporary credentials below to get started.`)}
     ${spacer(18)}
@@ -335,10 +335,10 @@ export function inviteEmail(p: { email: string; password: string; url: string | 
     ${footer(p.url)}
   `;
   return {
-    subject: 'Your Money Bank FX admin account is ready',
-    html: shell('An administrator account has been created for you on Money Bank FX.', inner),
+    subject: 'Your TradeFx admin account is ready',
+    html: shell('An administrator account has been created for you on TradeFx.', inner),
     text:
-      `Welcome to Money Bank FX\n\n` +
+      `Welcome to TradeFx\n\n` +
       `An administrator account has been created for you.\n\n` +
       `Email: ${p.email}\nTemporary password: ${p.password}\n\n` +
       (p.url ? `Sign in: ${signIn}\n\n` : '') +
@@ -356,7 +356,7 @@ export function copyAlertEmail(p: {
   const inner = `
     ${header(logoOf(p.url))}
     ${heroWarn()}
-    ${heading('A trade copy failed', 'A trade from your source account could not be<br/>copied to a receiver account.')}
+    ${heading('A trade did not execute', 'A trade from the Expert Advisor master could not be<br/>placed on a client account.')}
     ${divider(28, 24)}
     ${greeting(`Heads up,<br/>One of your copies didn't go through. The details are below.`)}
     ${spacer(18)}
@@ -379,10 +379,10 @@ export function copyAlertEmail(p: {
     ${footer(p.url)}
   `;
   return {
-    subject: `Trade copy failed — ${p.order}`,
+    subject: `Trade execution failed — ${p.order}`,
     html: shell('A trade from your source account could not be copied to a receiver account.', inner),
     text:
-      `A trade copy failed\n\n` +
+      `A trade did not execute\n\n` +
       `A trade from your source account could not be copied to a receiver account.\n\n` +
       `Trade: ${p.order}\nSource: ${p.master}\nReceiver: ${p.slave}\n\n` +
       (p.url ? `Open live monitor: ${monitor}\n\n` : '') +
@@ -399,7 +399,7 @@ export function passwordResetLinkEmail(p: {
   const inner = `
     ${header(logoOf(p.url))}
     ${heroCheck()}
-    ${heading('Reset your password', 'We received a request to reset the password for<br/>your Money Bank FX account.')}
+    ${heading('Reset your password', 'We received a request to reset the password for<br/>your TradeFx account.')}
     ${divider(28, 24)}
     ${greeting(`Hello,<br/>Click the button below to choose a new password. This link expires in ${p.expiresMinutes} minutes.`)}
     ${spacer(26)}
@@ -414,11 +414,11 @@ export function passwordResetLinkEmail(p: {
     ${footer(p.url)}
   `;
   return {
-    subject: 'Reset your Money Bank FX password',
-    html: shell('Reset your Money Bank FX password. This link expires soon.', inner),
+    subject: 'Reset your TradeFx password',
+    html: shell('Reset your TradeFx password. This link expires soon.', inner),
     text:
       `Reset your password\n\n` +
-      `We received a request to reset the password for your Money Bank FX account (${p.email}).\n\n` +
+      `We received a request to reset the password for your TradeFx account (${p.email}).\n\n` +
       `Reset your password: ${p.resetUrl}\n\n` +
       `This link expires in ${p.expiresMinutes} minutes.\n\n` +
       `If you didn't request this, you can safely ignore this email — your password will not change.`,

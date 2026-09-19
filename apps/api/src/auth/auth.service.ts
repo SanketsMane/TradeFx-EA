@@ -1,15 +1,17 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User, UserStatus } from '@prisma/client';
+import { Role, User, UserStatus } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/audit/audit.service';
 import { MailService } from '../mail/mail.service';
 import { TokenService } from './token.service';
+import { normalizePhone } from '../common/phone';
 
 export interface AuthTokens {
   accessToken: string;
@@ -42,6 +44,65 @@ export class AuthService {
     private readonly audit: AuditService,
     private readonly mail: MailService,
   ) {}
+
+  /**
+   * Self-service sign-up. Always creates a CUSTOMER — staff accounts are
+   * provisioned through /admins, and nothing a caller sends can change the
+   * role, so this route cannot be used to mint an admin.
+   */
+  async register(
+    input: { fullName: string; email: string; password: string; phone?: string },
+    meta: SessionMeta = {},
+  ): Promise<LoginResult> {
+    const email = input.email.toLowerCase().trim();
+
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      // The address is already discoverable through the sign-in form, so a
+      // clear message here costs nothing and saves a support ticket.
+      throw new ConflictException('An account with that email already exists.');
+    }
+
+    // A phone number is a sign-in identity, so it has to normalise cleanly and
+    // be free. Rejecting here beats a unique-constraint 500 later.
+    let phone: string | null = null;
+    if (input.phone?.trim()) {
+      phone = normalizePhone(input.phone);
+      if (!phone) {
+        throw new BadRequestException('Enter a valid 10-digit Indian mobile number.');
+      }
+      const phoneTaken = await this.prisma.user.findUnique({ where: { phone } });
+      if (phoneTaken) {
+        throw new ConflictException('An account with that mobile number already exists.');
+      }
+    }
+
+    const passwordHash = await argon2.hash(input.password);
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        role: Role.CUSTOMER,
+        fullName: input.fullName.trim(),
+        phone,
+      },
+    });
+
+    const session = await this.prisma.session.create({
+      data: { userId: user.id, hashedToken: '', userAgent: meta.userAgent, ip: meta.ip },
+    });
+    const tokens = await this.issueTokens(user, session.id);
+
+    await this.audit.log({
+      userId: user.id,
+      action: 'AUTH_REGISTER',
+      entityType: 'User',
+      entityId: user.id,
+      meta: { email },
+    });
+
+    return { ...tokens, user: AuthService.toPublicUser(user) };
+  }
 
   async login(email: string, password: string, meta: SessionMeta = {}): Promise<LoginResult> {
     const user = await this.prisma.user.findUnique({
@@ -272,6 +333,19 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new UnauthorizedException();
     return AuthService.toPublicUser(user);
+  }
+
+  /**
+   * Opens a session for an already-authenticated user and returns tokens.
+   * Shared by password login and OTP sign-in — whatever proved identity, the
+   * session handling after it is identical.
+   */
+  async startSession(user: User, meta: SessionMeta = {}): Promise<LoginResult> {
+    const session = await this.prisma.session.create({
+      data: { userId: user.id, hashedToken: '', userAgent: meta.userAgent, ip: meta.ip },
+    });
+    const tokens = await this.issueTokens(user, session.id);
+    return { ...tokens, user: AuthService.toPublicUser(user) };
   }
 
   /** Issues an access + refresh pair bound to a session, and rotates the stored hash. */
