@@ -105,12 +105,21 @@ for (const route of ROUTES) {
   }).catch(() => problems.push(`${route}: no canonical was set`));
   await page.waitForTimeout(250);
 
-  const { html, title, words, h1 } = await page.evaluate(() => ({
-    html: document.documentElement.outerHTML,
-    title: document.title,
-    words: (document.body.innerText || '').trim().split(/\s+/).length,
-    h1: document.querySelectorAll('h1').length,
-  }));
+  const { html, title, words, h1 } = await page.evaluate(() => {
+    /*
+     * textContent, not innerText. innerText is layout-dependent and returns
+     * an empty string under chrome-headless-shell, which lays nothing out —
+     * a fully rendered page then looks empty and fails the gate below.
+     */
+    const root = document.getElementById('root');
+    const text = (root?.textContent || '').replace(/\s+/g, ' ').trim();
+    return {
+      html: document.documentElement.outerHTML,
+      title: document.title,
+      words: text ? text.split(' ').length : 0,
+      h1: document.querySelectorAll('h1').length,
+    };
+  });
 
   // A route that renders almost nothing means the snapshot ran before React
   // committed — the exact failure this script exists to prevent.
