@@ -16,7 +16,15 @@ const links = [
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
-  const signedIn = isAuthenticated();
+
+  /*
+   * Resolved after mount, not during render. The page is prerendered as a
+   * logged-out visitor, so reading the token during the first render would
+   * make a signed-in user's markup disagree with the served HTML and force
+   * React to discard the hydrated tree.
+   */
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => setSignedIn(isAuthenticated()), []);
 
   // Route change closes the drawer — otherwise it hangs open over the new page.
   useEffect(() => setOpen(false), [pathname]);
