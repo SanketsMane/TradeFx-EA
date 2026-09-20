@@ -6,6 +6,7 @@ import { useSeo } from '@/lib/useSeo';
 import AuthTabs, { type AuthMode } from '@/components/auth/AuthTabs';
 import PhoneOtpForm from '@/components/auth/PhoneOtpForm';
 import { register } from '@/lib/api';
+import { trackSignUp } from '@/lib/analytics';
 import { TelegramIcon } from './LoginPage';
 
 /**
@@ -51,6 +52,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register({ fullName: fullName.trim(), email: email.trim(), password });
+      trackSignUp('email');
       navigate('/app');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'We could not create your account.');

@@ -6,6 +6,7 @@ import { useSeo } from '@/lib/useSeo';
 import AuthTabs, { type AuthMode } from '@/components/auth/AuthTabs';
 import PhoneOtpForm from '@/components/auth/PhoneOtpForm';
 import { login } from '@/lib/api';
+import { trackLogin } from '@/lib/analytics';
 
 /** Telegram's circular glyph — lucide ships no brand marks. */
 export function TelegramIcon({ className }: { className?: string }) {
@@ -40,6 +41,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const user = await login(email.trim(), password);
+      trackLogin('email');
       // Customers get their own portal; staff keep the admin dashboard.
       navigate(user.role === 'CUSTOMER' ? '/app' : '/dashboard');
     } catch (err) {

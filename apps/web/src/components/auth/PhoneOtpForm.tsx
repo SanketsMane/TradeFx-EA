@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Loader2, Pencil } from 'lucide-react';
 import { otpApi } from '@/lib/api';
+import { trackLogin, trackSignUp } from '@/lib/analytics';
 
 const FIELD =
   'h-12 w-full rounded-xl bg-[#f4f4f5] px-4 text-[15px] text-[#131316] outline-none transition-shadow placeholder:text-[#9b9ba1] focus:ring-2 focus:ring-brand-500';
@@ -97,6 +98,10 @@ export default function PhoneOtpForm({ askName }: { askName: boolean }) {
         setNotice('Almost there — tell us your name and we will finish setting up your account.');
         return;
       }
+      // `needsName` means this number had no account until a moment ago.
+      if (needsName || askName) trackSignUp('phone');
+      else trackLogin('phone');
+
       // A full reload lets the router pick the landing route up from the
       // freshly stored session, the same as password sign-in.
       window.location.assign(res.user.role === 'CUSTOMER' ? '/app' : '/dashboard');

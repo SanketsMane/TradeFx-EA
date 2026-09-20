@@ -5,6 +5,7 @@ import SiteHeader from '@/components/marketing/SiteHeader';
 import SiteFooter from '@/components/marketing/SiteFooter';
 import { products, services } from '@/lib/catalog';
 import { quotesApi } from '@/lib/api';
+import { trackLead } from '@/lib/analytics';
 import { useSeo } from '@/lib/useSeo';
 import { faqSchema } from '@/lib/seo';
 
@@ -93,6 +94,7 @@ export default function QuotePage() {
         message: message.trim(),
       });
       setReference(res.reference);
+      trackLead({ productSlug: productSlug || undefined, serviceSlug: serviceSlug || undefined });
     } catch (err) {
       setError(
         err instanceof Error

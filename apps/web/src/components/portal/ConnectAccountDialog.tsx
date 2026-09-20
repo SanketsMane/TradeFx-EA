@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Field, Input, Select } from '@/components/ui/form';
 import { useToast } from '@/components/ui/toast';
 import { portalApi, type EaLicense, type Platform } from '@/lib/api';
+import { track } from '@/lib/analytics';
 
 /** Licence codes are 9 characters, letters and digits, case-insensitive. */
 const CODE_RE = /^[A-Z0-9]{9}$/;
@@ -66,6 +67,7 @@ export default function ConnectAccountDialog({
     setLoading(true);
     try {
       await portalApi.linkAccount({ ...form, licenseCode: code });
+      track('connect_trading_account', { platform: form.platform });
       toast('Account connected — your Expert Advisor is starting up', 'success');
       onConnected();
       onClose();
