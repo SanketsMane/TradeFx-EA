@@ -58,9 +58,19 @@ export default function QuotePage() {
   });
   const [params] = useSearchParams();
 
-  // Deep links from a product or service card pre-select the subject.
-  const [productSlug, setProductSlug] = useState(params.get('product') ?? '');
-  const [serviceSlug, setServiceSlug] = useState(params.get('service') ?? '');
+  /*
+   * Deep links from a product or service card pre-select the subject. The slug
+   * is checked against the catalogue first: a stale or mistyped link would
+   * otherwise sit in state unseen — the select shows nothing matching it — and
+   * the API would reject the submission with a message about a field the
+   * visitor never filled in.
+   */
+  const [productSlug, setProductSlug] = useState(() =>
+    products.some((p) => p.slug === params.get('product')) ? params.get('product')! : '',
+  );
+  const [serviceSlug, setServiceSlug] = useState(() =>
+    services.some((s) => s.slug === params.get('service')) ? params.get('service')! : '',
+  );
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');

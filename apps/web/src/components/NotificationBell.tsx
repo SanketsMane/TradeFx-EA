@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Bell, Info, WifiOff, Wifi, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { notificationsApi, type Notification, type NotificationType } from '@/lib/api';
@@ -14,6 +15,25 @@ function iconFor(type: NotificationType) {
     default:
       return <Info className="h-4 w-4 text-gray-400" />;
   }
+}
+
+/**
+ * Where a notification points. Producers attach the ids in `meta`, so a
+ * notification can be acted on rather than only read — a quotation request in
+ * particular is a lead, and the next step is always to open it.
+ *
+ * Returns null when there is nothing specific to open; the row then renders
+ * as plain text rather than a dead link.
+ */
+function destinationFor(n: Notification): string | null {
+  const meta = (n.meta ?? {}) as Record<string, unknown>;
+  const id = (k: string) => (typeof meta[k] === 'string' ? (meta[k] as string) : null);
+
+  if (id('quoteId')) return '/dashboard/quotes';
+  if (n.type === 'COPY_FAILED') return '/dashboard/monitor';
+  const accountId = id('accountId') ?? id('receiverAccountId');
+  if (accountId) return `/dashboard/accounts/${accountId}`;
+  return null;
 }
 
 export function NotificationBell() {
@@ -79,11 +99,9 @@ export function NotificationBell() {
             <div className="px-4 py-10 text-center text-sm text-gray-400">No notifications yet</div>
           ) : (
             <div className="max-h-96 overflow-y-auto">
-              {items.map((n) => (
-                <div
-                  key={n.id}
-                  className={cn('border-b border-gray-50 px-4 py-3', !n.readAt && 'bg-brand-50/40')}
-                >
+              {items.map((n) => {
+                const to = destinationFor(n);
+                const inner = (
                   <div className="flex items-start gap-2.5">
                     <span className="mt-0.5 shrink-0">{iconFor(n.type)}</span>
                     <div className="min-w-0">
@@ -94,8 +112,22 @@ export function NotificationBell() {
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+                const className = cn(
+                  'block border-b border-gray-50 px-4 py-3',
+                  !n.readAt && 'bg-brand-50/40',
+                  to && 'hover:bg-gray-50',
+                );
+                return to ? (
+                  <Link key={n.id} to={to} className={className} onClick={() => setOpen(false)}>
+                    {inner}
+                  </Link>
+                ) : (
+                  <div key={n.id} className={className}>
+                    {inner}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
