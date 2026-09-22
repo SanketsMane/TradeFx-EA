@@ -127,6 +127,37 @@ const page = await context.newPage();
 let written = 0;
 const problems = [];
 
+
+/*
+ * Claims this site may not make.
+ *
+ * Checked against the rendered text of every public page, not the source, so
+ * it holds wherever the words are written — catalogue, guides, a component, a
+ * meta description. Two rules, both from the content brief:
+ *
+ *   - The products are Expert Advisors. "Copy trading" is the internal
+ *     mechanism and never the customer-facing word.
+ *   - No performance or latency figure without a verified third-party record
+ *     to point at. There is none yet, so there is no number to print. If a
+ *     Myfxbook or FXBlue record ever exists, relax this deliberately rather
+ *     than by accident.
+ *
+ * Deliberately narrow: a rule that cries wolf gets commented out.
+ */
+const FORBIDDEN_CLAIMS = [
+  [/\bcopy[ -]trading\b|\btrade copier\b/i, 'says "copy trading" — these are Expert Advisors'],
+  [
+    /\b\d+(?:\.\d+)?\s*%\s*(?:profit|return|returns|gain|gains|accuracy|win|roi)\b/i,
+    'prints a performance percentage',
+  ],
+  [
+    /\b(?:win rate|accuracy|roi|monthly return|annual return)\b[^.]{0,24}\b\d+(?:\.\d+)?\s*%/i,
+    'prints a performance percentage',
+  ],
+  [/\bsub-?millisecond\b|\b\d+(?:\.\d+)?\s*(?:ms|milliseconds?)\b/i, 'prints a latency figure'],
+  [/\b\d{2}(?:\.\d+)?\s*%\s*uptime\b/i, 'prints an uptime figure'],
+];
+
 for (const route of ROUTES) {
   await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: 'networkidle', timeout: 45000 });
   // useSeo writes the head in an effect; give React a beat to commit it.
@@ -135,19 +166,40 @@ for (const route of ROUTES) {
   }).catch(() => problems.push(`${route}: no canonical was set`));
   await page.waitForTimeout(250);
 
-  const { html, title, words, h1 } = await page.evaluate(() => {
+  const { html, title, words, h1, text } = await page.evaluate(() => {
     /*
-     * textContent, not innerText. innerText is layout-dependent and returns
-     * an empty string under chrome-headless-shell, which lays nothing out —
-     * a fully rendered page then looks empty and fails the gate below.
+     * Walk the text nodes rather than reading textContent.
+     *
+     * innerText is out: it is layout-dependent and returns an empty string
+     * under chrome-headless-shell, which lays nothing out, so a fully
+     * rendered page looks empty and fails the gate below.
+     *
+     * textContent is out too, for a subtler reason: it concatenates adjacent
+     * elements with no separator, so a heading followed by a paragraph reads
+     * as "...quotationSub-millisecond...". That silently joins two words into
+     * one in the count, and — worse — destroys the word boundary a claim
+     * check anchors on, letting a forbidden phrase through because it happens
+     * to sit at the start of an element.
      */
     const root = document.getElementById('root');
-    const text = (root?.textContent || '').replace(/\s+/g, ' ').trim();
+    const walker = root
+      ? document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+          acceptNode: (n) =>
+            /^(script|style|noscript)$/i.test(n.parentElement?.tagName ?? '')
+              ? NodeFilter.FILTER_REJECT
+              : NodeFilter.FILTER_ACCEPT,
+        })
+      : null;
+    const parts = [];
+    while (walker?.nextNode()) parts.push(walker.currentNode.nodeValue);
+    const text = parts.join(' ').replace(/\s+/g, ' ').trim();
     return {
       html: document.documentElement.outerHTML,
       title: document.title,
       words: text ? text.split(' ').length : 0,
       h1: document.querySelectorAll('h1').length,
+      // The head carries claims too — a meta description is copy.
+      text: `${text} ${document.querySelector('meta[name="description"]')?.content ?? ''}`,
     };
   });
 
@@ -157,6 +209,11 @@ for (const route of ROUTES) {
     problems.push(`${route}: only ${words} words captured — did the render finish?`);
   }
   if (h1 !== 1) problems.push(`${route}: ${h1} <h1> elements, expected exactly 1`);
+
+  for (const [pattern, why] of FORBIDDEN_CLAIMS) {
+    const hit = text.match(pattern);
+    if (hit) problems.push(`${route}: ${why} — "${hit[0]}"`);
+  }
 
   // nginx serves /404 as its error page, so it is written as a flat file.
   if (route === '/404') {

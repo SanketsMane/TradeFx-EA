@@ -436,7 +436,7 @@ export const services: Service[] = [
     summary:
       'Low-latency Windows servers next door to the major broker data centres, so your terminal runs whether your laptop is on or not.',
     bullets: [
-      'Sub-millisecond routes to London, New York and Tokyo',
+      'Located near the major broker hubs in London, New York and Tokyo',
       'Runs continuously, monitored around the clock',
       'MT4 and MT5 pre-installed and configured',
       'Scale the plan as you add accounts',
