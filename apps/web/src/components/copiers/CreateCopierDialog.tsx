@@ -6,6 +6,7 @@ import { Field, Input, Select } from '@/components/ui/form';
 import { useToast } from '@/components/ui/toast';
 import { useAsync } from '@/hooks/useAsync';
 import { accountsApi, copierApi } from '@/lib/api';
+import { products } from '@/lib/catalog';
 
 export function CreateCopierDialog({
   open,
@@ -18,13 +19,18 @@ export function CreateCopierDialog({
 }) {
   const toast = useToast();
   const { data: accounts } = useAsync(() => accountsApi.list(), [open]);
+  const { data: existing } = useAsync(() => copierApi.list(), [open]);
   const [name, setName] = useState('');
   const [sourceId, setSourceId] = useState('');
+  const [productSlug, setProductSlug] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // A source can only drive one copier, so exclude accounts already used as a source.
   const available = (accounts ?? []).filter((a) => !a.sourceForConfig);
+
+  // One master per product: a slug already attached elsewhere can't be reused.
+  const takenBy = new Map((existing ?? []).flatMap((c) => (c.productSlug ? [[c.productSlug, c.name] as const] : [])));
 
   const submit = async () => {
     setError(null);
@@ -32,10 +38,11 @@ export function CreateCopierDialog({
     if (!sourceId) return setError('Select a source account.');
     setLoading(true);
     try {
-      await copierApi.create(name.trim(), sourceId);
+      await copierApi.create(name.trim(), sourceId, productSlug);
       toast('EA master created', 'success');
       setName('');
       setSourceId('');
+      setProductSlug('');
       onCreated();
       onClose();
     } catch (e) {
@@ -82,6 +89,23 @@ export function CreateCopierDialog({
               ))}
             </Select>
           )}
+        </Field>
+        <Field
+          label="Expert Advisor"
+          hint="Customers who own a licence for this EA are attached to this master. Leave unset for an internal master no customer can reach."
+        >
+          <Select value={productSlug} onChange={(e) => setProductSlug(e.target.value)}>
+            <option value="">Internal — not linked to a product</option>
+            {products.map((p) => {
+              const owner = takenBy.get(p.slug);
+              return (
+                <option key={p.slug} value={p.slug} disabled={Boolean(owner)}>
+                  {p.name}
+                  {owner ? ` — already served by ${owner}` : ''}
+                </option>
+              );
+            })}
+          </Select>
         </Field>
         {error && <p className="text-sm text-red-600">{error}</p>}
       </div>

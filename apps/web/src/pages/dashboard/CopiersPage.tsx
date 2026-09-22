@@ -17,13 +17,15 @@ import { CreateCopierDialog } from '@/components/copiers/CreateCopierDialog';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useAsync } from '@/hooks/useAsync';
 import { copierApi, type CopierConfig } from '@/lib/api';
+import { products } from '@/lib/catalog';
 
-const MAX_COPIERS = 2;
+const productName = (slug: string) => products.find((p) => p.slug === slug)?.name ?? slug;
 
 export default function CopiersPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const { data: copiers, loading, error, reload } = useAsync(() => copierApi.list(), []);
+  const { data: limits } = useAsync(() => copierApi.limits(), []);
   const [addOpen, setAddOpen] = useState(false);
   const [toDelete, setToDelete] = useState<CopierConfig | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -31,6 +33,9 @@ export default function CopiersPage() {
   const list = copiers ?? [];
   const enabled = list.filter((c) => c.enabled).length;
   const receivers = list.reduce((n, c) => n + c._count.subscriptions, 0);
+  const max = limits?.maxCopiers;
+  const atCap = max !== undefined && list.length >= max;
+  const unserved = products.filter((p) => !list.some((c) => c.productSlug === p.slug));
 
   const toggleEnabled = async (c: CopierConfig) => {
     try {
@@ -62,16 +67,21 @@ export default function CopiersPage() {
         title="EA Masters"
         subtitle="Each master runs an Expert Advisor and mirrors its trades to client accounts."
         actions={
-          <Button onClick={() => setAddOpen(true)} disabled={list.length >= MAX_COPIERS}>
+          <Button onClick={() => setAddOpen(true)} disabled={atCap}>
             <Plus className="h-4 w-4" /> Create EA Master
           </Button>
         }
       />
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <StatCard label="EA Masters" value={list.length} sub={`of ${MAX_COPIERS} allowed`} />
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="EA Masters" value={list.length} sub={max ? `of ${max} allowed` : '\u00a0'} />
         <StatCard label="Active" value={enabled} sub="masters running" />
         <StatCard label="Receivers" value={receivers} sub="across all masters" />
+        <StatCard
+          label="Unserved products"
+          value={unserved.length}
+          sub={unserved.length ? 'no master attached' : 'every EA has a master'}
+        />
       </div>
 
       <Card>
@@ -100,6 +110,7 @@ export default function CopiersPage() {
               <thead>
                 <tr className="border-b border-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-400">
                   <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Expert Advisor</th>
                   <th className="px-4 py-3">Source</th>
                   <th className="px-4 py-3">Receivers</th>
                   <th className="px-4 py-3">Enabled</th>
@@ -116,6 +127,13 @@ export default function CopiersPage() {
                       >
                         {c.name}
                       </button>
+                    </td>
+                    <td className="px-4 py-3">
+                      {c.productSlug ? (
+                        <Badge tone="blue">{productName(c.productSlug)}</Badge>
+                      ) : (
+                        <span className="text-gray-400">Internal</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
                       {c.sourceAccount.label}

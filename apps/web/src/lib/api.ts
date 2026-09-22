@@ -94,6 +94,8 @@ export interface Subscription {
 export interface CopierConfig {
   id: string;
   name: string;
+  /** Catalogue product this master runs. Null = internal, not sellable. */
+  productSlug: string | null;
   sourceAccountId: string;
   copyfactoryStrategyId: string;
   enabled: boolean;
@@ -362,15 +364,22 @@ export interface ReceiverRules {
   tradeWindowStart?: number | null;
   tradeWindowEnd?: number | null;
 }
+export interface CopierLimits {
+  maxCopiers: number;
+  maxReceiversPerCopier: number;
+  used: number;
+}
+
 export const copierApi = {
   list: () => apiFetch<CopierConfig[]>('/copiers'),
+  limits: () => apiFetch<CopierLimits>('/copiers/limits'),
   get: (id: string) => apiFetch<CopierConfigDetail>(`/copiers/${id}`),
-  create: (name: string, sourceAccountId: string) =>
+  create: (name: string, sourceAccountId: string, productSlug?: string) =>
     apiFetch<CopierConfig>('/copiers', {
       method: 'POST',
-      body: JSON.stringify({ name, sourceAccountId }),
+      body: JSON.stringify({ name, sourceAccountId, productSlug: productSlug || undefined }),
     }),
-  update: (id: string, body: { name?: string; enabled?: boolean }) =>
+  update: (id: string, body: { name?: string; enabled?: boolean; productSlug?: string | null }) =>
     apiFetch<CopierConfig>(`/copiers/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   remove: (id: string) => apiFetch<void>(`/copiers/${id}`, { method: 'DELETE' }),
   closeAll: (id: string) =>

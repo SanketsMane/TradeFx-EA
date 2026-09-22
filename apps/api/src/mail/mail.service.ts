@@ -7,6 +7,7 @@ import { SettingsService, SmtpConfig } from '../settings/settings.service';
 import { ResendService } from './resend.service';
 import {
   executionAlertEmail,
+  newQuoteAlertEmail,
   inviteEmail,
   licenseIssuedEmail,
   passwordResetLinkEmail,
@@ -252,6 +253,33 @@ export class MailService {
   ): Promise<MailResult> {
     const { subject, html, text } = quoteAnsweredEmail({ ...p, url: this.appUrl() });
     return this.send({ to: email, subject, html, text });
+  }
+
+  /**
+   * Tells staff a lead just came in. Best-effort and never throws: a customer's
+   * request must be recorded even when the mail transport is down, and they
+   * have their own acknowledgement either way.
+   */
+  async sendNewQuoteAlert(p: {
+    reference: string;
+    subjectLine: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    broker: string | null;
+    accountSize: string | null;
+    message: string;
+    registered: boolean;
+  }): Promise<void> {
+    if (!this.isConfigured() || !this.alertsEnabled()) return;
+    try {
+      const recipients = await this.alertRecipients();
+      if (recipients.length === 0) return;
+      const { subject, html, text } = newQuoteAlertEmail({ ...p, url: this.appUrl() });
+      await this.send({ to: recipients.join(','), subject, html, text });
+    } catch (err) {
+      this.logger.warn(`New-quote alert failed: ${(err as Error).message}`);
+    }
   }
 
   /** Recipients for execution alerts: configured alertEmail, else all active super-admins. */

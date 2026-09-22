@@ -632,3 +632,56 @@ export function executionAlertEmail(p: {
     textFooter(p.url);
   return { subject: `Trade execution failed — ${p.order}`, html, text };
 }
+
+/**
+ * Internal alert: a customer asked for a quotation.
+ *
+ * Every sale starts here, so this goes to staff the moment the form is
+ * submitted rather than waiting for someone to open the dashboard. It carries
+ * the enquiry itself so an advisor can judge urgency without signing in — but
+ * never a price, because the platform holds none.
+ */
+export function newQuoteAlertEmail(p: {
+  reference: string;
+  subjectLine: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  broker: string | null;
+  accountSize: string | null;
+  message: string;
+  registered: boolean;
+  url: string | null;
+}): RenderedEmail {
+  const link = p.url ? `${p.url.replace(/\/+$/, '')}/dashboard/quotes` : '#';
+  const messageHtml = esc(p.message).replace(/\n/g, '<br />');
+  const rows: [string, string][] = [
+    ['Reference', p.reference],
+    ['Enquiry about', p.subjectLine],
+    ['Name', p.name],
+    ['Email', p.email],
+  ];
+  if (p.phone) rows.push(['Phone', p.phone]);
+  if (p.broker) rows.push(['Broker', p.broker]);
+  if (p.accountSize) rows.push(['Account size', p.accountSize]);
+  rows.push(['Account', p.registered ? 'Registered customer' : 'No account yet']);
+
+  const html = shell(
+    `${p.name} asked for a quotation — ${p.reference}.`,
+    `${header(logoOf(p.url))}
+     ${pill('New enquiry', 'info')}
+     ${heading('Someone asked for a quotation', 'They have been sent an acknowledgement and are waiting on a price from you.')}
+     ${details(rows)}
+     ${notice('What they wrote', messageHtml, 'brand')}
+     ${button('Open the quote', link)}
+     ${footer(p.url)}`,
+  );
+  const text =
+    `Someone asked for a quotation\n\n` +
+    `They have been sent an acknowledgement and are waiting on a price from you.\n\n` +
+    rows.map(([k, v]) => `${k}: ${v}`).join('\n') +
+    `\n\nWhat they wrote:\n${p.message}\n\n` +
+    `Open the quote: ${link}` +
+    textFooter(p.url);
+  return { subject: `New quotation request — ${p.reference} (${p.subjectLine})`, html, text };
+}

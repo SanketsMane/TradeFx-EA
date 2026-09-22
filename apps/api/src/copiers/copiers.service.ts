@@ -43,6 +43,7 @@ const SUB_VIEW = {
 const COPIER_VIEW = {
   id: true,
   name: true,
+  productSlug: true,
   sourceAccountId: true,
   copyfactoryStrategyId: true,
   enabled: true,
@@ -75,7 +76,9 @@ export class CopiersService {
   ) {}
 
   private get maxCopiers(): number {
-    return this.config.get<number>('MAX_COPIERS', 2);
+    // Default covers one master per catalogue product plus internal masters
+    // used for testing. Raise MAX_COPIERS if the catalogue grows.
+    return this.config.get<number>('MAX_COPIERS', 8);
   }
   private get maxReceivers(): number {
     return this.config.get<number>('MAX_RECEIVERS_PER_COPIER', 10);
@@ -97,6 +100,16 @@ export class CopiersService {
   }
 
   // -------- Configs --------
+  /** The caps this actor is working under, for the admin UI. */
+  async limits(actor: Actor) {
+    const used = await this.prisma.copierConfig.count({ where: ownedBy(actor) });
+    return {
+      maxCopiers: this.maxCopiers,
+      maxReceiversPerCopier: this.maxReceivers,
+      used,
+    };
+  }
+
   listConfigs(actor: Actor): Promise<CopierView[]> {
     return this.prisma.copierConfig.findMany({
       where: ownedBy(actor),
@@ -133,6 +146,20 @@ export class CopiersService {
       throw new ConflictException('This account is already a source in another copier.');
     }
 
+    // One master per product: the customer portal resolves a licence to its
+    // master by slug, so a second claimant would make that lookup ambiguous.
+    if (dto.productSlug) {
+      const taken = await this.prisma.copierConfig.findUnique({
+        where: { productSlug: dto.productSlug },
+        select: { name: true },
+      });
+      if (taken) {
+        throw new ConflictException(
+          `"${taken.name}" is already the master for that Expert Advisor. Detach it first.`,
+        );
+      }
+    }
+
     const { strategyId } = await this.copier.createStrategy({
       metaapiAccountId: source.metaapiAccountId,
       name: dto.name,
@@ -143,6 +170,7 @@ export class CopiersService {
         data: {
           name: dto.name,
           sourceAccountId: dto.sourceAccountId,
+          productSlug: dto.productSlug ?? null,
           copyfactoryStrategyId: strategyId,
           createdById: actorId,
         },
@@ -153,7 +181,11 @@ export class CopiersService {
         action: 'COPIER_CREATED',
         entityType: 'CopierConfig',
         entityId: config.id,
-        meta: { name: config.name, sourceAccountId: dto.sourceAccountId },
+        meta: {
+          name: config.name,
+          sourceAccountId: dto.sourceAccountId,
+          productSlug: dto.productSlug ?? null,
+        },
       });
       return config;
     } catch (err) {
@@ -180,9 +212,28 @@ export class CopiersService {
       }
     }
 
+    // Same one-master-per-product rule as create, checked here so an admin
+    // gets a clear message instead of a unique-constraint 500.
+    if (dto.productSlug) {
+      const taken = await this.prisma.copierConfig.findUnique({
+        where: { productSlug: dto.productSlug },
+        select: { id: true, name: true },
+      });
+      if (taken && taken.id !== id) {
+        throw new ConflictException(
+          `"${taken.name}" is already the master for that Expert Advisor. Detach it first.`,
+        );
+      }
+    }
+
     const updated = await this.prisma.copierConfig.update({
       where: { id },
-      data: { name: dto.name, enabled: dto.enabled },
+      data: {
+        name: dto.name,
+        enabled: dto.enabled,
+        // undefined leaves it alone; an explicit null detaches the product.
+        productSlug: dto.productSlug === undefined ? undefined : dto.productSlug,
+      },
       select: COPIER_VIEW,
     });
     await this.audit.log({

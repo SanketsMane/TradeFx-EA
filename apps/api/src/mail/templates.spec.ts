@@ -2,6 +2,7 @@ import {
   executionAlertEmail,
   inviteEmail,
   licenseIssuedEmail,
+  newQuoteAlertEmail,
   passwordResetLinkEmail,
   quoteAnsweredEmail,
   quoteReceivedEmail,
@@ -32,6 +33,21 @@ const ALL: [string, RenderedEmail][] = [
       reference: 'TFX-4821',
       subjectLine: 'TradeFx Heddge',
       note: 'Quoted by email today.',
+      url,
+    }),
+  ],
+  [
+    'newQuoteAlert',
+    newQuoteAlertEmail({
+      reference: 'TFX-4821',
+      subjectLine: 'TradeFx Heddge',
+      name: 'Asha Patel',
+      email: 'asha@example.com',
+      phone: '+919812345678',
+      broker: 'Exness',
+      accountSize: '1000-5000',
+      message: 'How much for the Heddge EA?',
+      registered: true,
       url,
     }),
   ],
@@ -140,6 +156,47 @@ describe('email templates', () => {
       expect(r.text).toContain('Line one.\nLine two.');
     });
 
+    it('new-quote alert carries the enquiry so staff can triage from the inbox', () => {
+      const r = newQuoteAlertEmail({
+        reference: 'TFX-4821',
+        subjectLine: 'TradeFx Heddge',
+        name: 'Asha Patel',
+        email: 'asha@example.com',
+        phone: '+919812345678',
+        broker: 'Exness',
+        accountSize: '1000-5000',
+        message: 'How much for the Heddge EA?',
+        registered: false,
+        url,
+      });
+      expect(r.subject).toContain('TFX-4821');
+      expect(r.subject).toContain('TradeFx Heddge');
+      expect(r.html).toContain('asha@example.com');
+      expect(r.html).toContain('+919812345678');
+      expect(r.html).toContain('How much for the Heddge EA?');
+      expect(r.html).toContain('No account yet');
+      expect(r.html).toContain(`${url}/dashboard/quotes`);
+    });
+
+    it('new-quote alert omits fields the customer left blank rather than printing null', () => {
+      const r = newQuoteAlertEmail({
+        reference: 'TFX-1',
+        subjectLine: 'TradeFx Scalper',
+        name: 'Asha',
+        email: 'asha@example.com',
+        phone: null,
+        broker: null,
+        accountSize: null,
+        message: 'Please quote.',
+        registered: true,
+        url,
+      });
+      expect(r.html).not.toContain('null');
+      expect(r.text).not.toContain('null');
+      expect(r.html).not.toContain('Phone');
+      expect(r.html).toContain('Registered customer');
+    });
+
     it('execution alert names both accounts and what to check', () => {
       const r = executionAlertEmail({
         order: 'BUY 0.50 XAUUSD (OPEN)',
@@ -169,6 +226,25 @@ describe('email templates', () => {
       expect(r.html).toContain('&lt;script&gt;');
       expect(r.html).toContain('&lt;b&gt;bold&lt;/b&gt;');
       expect(r.html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+    });
+
+    it('escapes HTML in a quotation enquiry, which is attacker-controlled', () => {
+      const r = newQuoteAlertEmail({
+        reference: 'TFX-1',
+        subjectLine: 'TradeFx Scalper',
+        name: '<script>alert(1)</script>',
+        email: 'a@b.com',
+        phone: null,
+        broker: '"><img src=x onerror=alert(1)>',
+        accountSize: null,
+        message: '<b>quote me</b>',
+        registered: false,
+        url,
+      });
+      expect(r.html).not.toMatch(/<script/i);
+      expect(r.html).not.toMatch(/<img[^>]*onerror/i);
+      expect(r.html).toContain('&lt;script&gt;');
+      expect(r.html).toContain('&lt;b&gt;quote me&lt;/b&gt;');
     });
 
     it('renders without an app URL, falling back to the monogram', () => {

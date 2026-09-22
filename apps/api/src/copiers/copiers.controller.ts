@@ -30,6 +30,11 @@ export class CopiersController {
     return this.copiers.createConfig(dto, actor);
   }
 
+  @Get('copiers/limits')
+  limits(@CurrentUser() actor: AuthPayload) {
+    return this.copiers.limits(actor);
+  }
+
   @Get('copiers/:id')
   get(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() actor: AuthPayload) {
     return this.copiers.getConfig(id, actor);

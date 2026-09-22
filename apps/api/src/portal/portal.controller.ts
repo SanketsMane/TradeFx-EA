@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Post,
   Query,
 } from '@nestjs/common';
@@ -15,6 +14,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { AuthPayload, CurrentUser } from '../common/decorators/current-user.decorator';
 import { PortalService } from './portal.service';
 import { LinkAccountDto } from './dto/link-account.dto';
+import { StatementQueryDto } from './dto/statement-query.dto';
 
 /**
  * Everything the customer portal calls. Customer-only by design: staff use
@@ -50,10 +50,9 @@ export class PortalController {
   statement(
     @Param('id') id: string,
     @CurrentUser() user: AuthPayload,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
-    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
+    @Query() q: StatementQueryDto,
   ) {
-    return this.portal.statement(id, user, limit ?? 100, offset ?? 0);
+    return this.portal.statement(id, user, q.limit ?? 100, q.offset ?? 0);
   }
 
   @Get('accounts')

@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, QuoteRequest, QuoteStatus } from '@prisma/client';
+import { NotificationType, Prisma, QuoteRequest, QuoteStatus } from '@prisma/client';
 import { randomInt } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../common/audit/audit.service';
 import { MailService } from '../mail/mail.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PRODUCTS, isProductSlug } from '../common/catalog';
 import { Actor } from '../common/scope';
 import { CreateQuoteDto } from './dto/create-quote.dto';
@@ -30,6 +31,7 @@ export class QuotesService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly mail: MailService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /**
@@ -66,10 +68,32 @@ export class QuotesService {
       }),
     );
 
+    const subjectLine = QuotesService.subjectLine(dto.productSlug, dto.serviceSlug);
+
     void this.mail.sendQuoteReceived(email, {
       name: dto.name.trim(),
       reference: created.reference,
-      subjectLine: QuotesService.subjectLine(dto.productSlug, dto.serviceSlug),
+      subjectLine,
+    });
+
+    // Every sale starts with one of these, so staff are told straight away
+    // rather than finding it next time someone opens the dashboard.
+    void this.mail.sendNewQuoteAlert({
+      reference: created.reference,
+      subjectLine,
+      name: dto.name.trim(),
+      email,
+      phone: dto.phone?.trim() || null,
+      broker: dto.broker?.trim() || null,
+      accountSize: dto.accountSize ?? null,
+      message: dto.message.trim(),
+      registered: Boolean(user),
+    });
+    void this.notifications.notifyAdmins({
+      type: NotificationType.INFO,
+      title: `New quotation request — ${created.reference}`,
+      body: `${dto.name.trim()} asked about ${subjectLine}.`,
+      meta: { reference: created.reference, quoteId: created.id },
     });
 
     await this.audit.log({
