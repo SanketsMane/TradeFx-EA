@@ -1,9 +1,12 @@
 import { useState, type FormEvent } from 'react';
+import { useSeo } from '@/lib/useSeo';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { resetPassword } from '@/lib/api';
 
 export default function ResetPasswordPage() {
+  useSeo({ title: 'Choose a new password', path: '/reset-password', noindex: true });
+
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get('token') ?? '';

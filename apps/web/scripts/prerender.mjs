@@ -27,7 +27,13 @@ const PORT = 4179;
  * Routes that are short by design — sign-in forms carry a noindex, so a
  * thin-content warning on them is noise, not a signal.
  */
-const THIN_BY_DESIGN = new Set(['/login', '/register']);
+const THIN_BY_DESIGN = new Set([
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/404',
+]);
 
 const ROUTES = [
   '/',
@@ -54,6 +60,9 @@ const ROUTES = [
   '/contact',
   '/login',
   '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/404',
 ];
 
 const MIME = {
@@ -82,8 +91,11 @@ function serve() {
       const url = decodeURIComponent((req.url || '/').split('?')[0]);
       const direct = join(DIST, url);
       const asRoute = join(DIST, url, 'index.html');
+      // /404 is written flat, matching how nginx serves it as the error page.
+      const asError = url === '/404' ? join(DIST, '404.html') : null;
       let file;
       if (extname(url) && existsSync(direct)) file = direct;
+      else if (serveSnapshots && asError && existsSync(asError)) file = asError;
       else if (serveSnapshots && existsSync(asRoute)) file = asRoute;
       else file = join(DIST, 'index.html');
       try {
@@ -146,9 +158,14 @@ for (const route of ROUTES) {
   }
   if (h1 !== 1) problems.push(`${route}: ${h1} <h1> elements, expected exactly 1`);
 
-  const outDir = route === '/' ? DIST : join(DIST, route);
-  await mkdir(outDir, { recursive: true });
-  await writeFile(join(outDir, 'index.html'), `<!DOCTYPE html>\n${html}\n`);
+  // nginx serves /404 as its error page, so it is written as a flat file.
+  if (route === '/404') {
+    await writeFile(join(DIST, '404.html'), `<!DOCTYPE html>\n${html}\n`);
+  } else {
+    const outDir = route === '/' ? DIST : join(DIST, route);
+    await mkdir(outDir, { recursive: true });
+    await writeFile(join(outDir, 'index.html'), `<!DOCTYPE html>\n${html}\n`);
+  }
   written++;
   console.log(`  ${route.padEnd(22)} ${String(words).padStart(4)} words  h1=${h1}  ${title.slice(0, 44)}`);
 }

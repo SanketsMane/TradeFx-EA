@@ -1,9 +1,12 @@
 import { useState, type FormEvent } from 'react';
+import { useSeo } from '@/lib/useSeo';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, MailCheck } from 'lucide-react';
 import { forgotPassword } from '@/lib/api';
 
 export default function ForgotPasswordPage() {
+  useSeo({ title: 'Reset your password', path: '/forgot-password', noindex: true });
+
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
