@@ -240,13 +240,21 @@ export default function ProductDetailPage() {
             ))}
           </div>
 
+          {/*
+           * Every panel is rendered and the inactive ones carry `hidden`,
+           * rather than mounting only the active one. Tab content that is
+           * never in the HTML is invisible to a crawler: what is included
+           * and the requirements reached Google nowhere at all, and the FAQ
+           * answers only as JSON-LD. Hiding rather than unmounting is also
+           * the correct ARIA tab pattern.
+           */}
           <div
             role="tabpanel"
-            id={`panel-${tab}`}
-            aria-labelledby={`tab-${tab}`}
+            id="panel-overview"
+            aria-labelledby="tab-overview"
+            hidden={tab !== 'overview'}
             className="pt-8"
           >
-            {tab === 'overview' && (
               <div className="space-y-10">
                 <div className="max-w-3xl space-y-4">
                   {product.description.map((para) => (
@@ -275,9 +283,15 @@ export default function ProductDetailPage() {
                   </div>
                 )}
               </div>
-            )}
+          </div>
 
-            {tab === 'included' && (
+          <div
+            role="tabpanel"
+            id="panel-included"
+            aria-labelledby="tab-included"
+            hidden={tab !== 'included'}
+            className="pt-8"
+          >
               <ul className="grid max-w-4xl gap-3 sm:grid-cols-2">
                 {product.included.map((i) => (
                   <li
@@ -291,9 +305,15 @@ export default function ProductDetailPage() {
                   </li>
                 ))}
               </ul>
-            )}
+          </div>
 
-            {tab === 'requirements' && (
+          <div
+            role="tabpanel"
+            id="panel-requirements"
+            aria-labelledby="tab-requirements"
+            hidden={tab !== 'requirements'}
+            className="pt-8"
+          >
               <div className="max-w-3xl">
                 <ul className="space-y-3">
                   {product.requirements.map((r) => (
@@ -308,9 +328,15 @@ export default function ProductDetailPage() {
                   will confirm before anything is purchased.
                 </p>
               </div>
-            )}
+          </div>
 
-            {tab === 'faq' && (
+          <div
+            role="tabpanel"
+            id="panel-faq"
+            aria-labelledby="tab-faq"
+            hidden={tab !== 'faq'}
+            className="pt-8"
+          >
               <dl className="max-w-3xl space-y-4">
                 {product.faqs.map((f) => (
                   <div key={f.q} className="rounded-2xl border border-gray-200 bg-white p-5">
@@ -326,7 +352,6 @@ export default function ProductDetailPage() {
                   <span>.</span>
                 </p>
               </dl>
-            )}
           </div>
         </div>
       </section>
