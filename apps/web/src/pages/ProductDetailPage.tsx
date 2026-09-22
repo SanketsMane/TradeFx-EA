@@ -247,12 +247,33 @@ export default function ProductDetailPage() {
             className="pt-8"
           >
             {tab === 'overview' && (
-              <div className="max-w-3xl space-y-4">
-                {product.description.map((para) => (
-                  <p key={para.slice(0, 40)} className="text-base leading-relaxed text-gray-600">
-                    {para}
-                  </p>
-                ))}
+              <div className="space-y-10">
+                <div className="max-w-3xl space-y-4">
+                  {product.description.map((para) => (
+                    <p key={para.slice(0, 40)} className="text-base leading-relaxed text-gray-600">
+                      {para}
+                    </p>
+                  ))}
+                </div>
+
+                {product.features && (
+                  <div>
+                    <h2 className="text-lg font-bold tracking-tight text-gray-900">
+                      What it does on your account
+                    </h2>
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {product.features.map((f) => (
+                        <div
+                          key={f.title}
+                          className="rounded-2xl border border-gray-200 bg-white p-5"
+                        >
+                          <h3 className="text-sm font-semibold text-gray-900">{f.title}</h3>
+                          <p className="mt-2 text-sm leading-relaxed text-gray-600">{f.body}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

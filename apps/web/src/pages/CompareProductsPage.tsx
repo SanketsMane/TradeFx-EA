@@ -19,6 +19,7 @@ const ROWS: { label: string; get: (p: (typeof products)[number]) => string }[] =
   { label: 'Platform', get: (p) => p.platform },
   { label: 'Trade frequency', get: (p) => p.compare.frequency },
   { label: 'Typical horizon', get: (p) => p.compare.horizon },
+  { label: 'Risk controls', get: () => 'A stop loss and a take profit on every trade' },
   { label: 'Account needed', get: (p) => p.compare.accountType },
   { label: 'Best for', get: (p) => p.compare.bestFor },
 ];
@@ -97,8 +98,11 @@ export default function CompareProductsPage() {
           and what kind of broker account they need.
         </p>
         <p className="mt-4 max-w-2xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
-          The risk labels below are relative to each other, not a promise. Every Expert Advisor here
-          trades on margin and can lose money, including more than your deposit.
+          Every Expert Advisor here opens each position with a stop loss and a take profit, so no
+          trade is left to run unbounded. That is not the same as safety: the risk labels below are
+          relative to each other rather than a promise, all of these trade on margin, and a gap or
+          fast market can carry a price past a stop. You can lose money, including more than your
+          deposit.
         </p>
       </section>
 

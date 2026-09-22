@@ -49,6 +49,9 @@ export interface Product {
   description: string[];
   /** The four icon captions along the bottom of the box. */
   highlights: string[];
+  /** Optional deep-dive blocks under the overview prose, for products whose
+   *  mechanics need more than three paragraphs. Rendered as a card grid. */
+  features?: { title: string; body: string }[];
   platform: string;
   /** Short badge for cards — must stay on one line at a 4-up grid width. */
   tag: string;
@@ -91,17 +94,52 @@ export const products: Product[] = [
     kicker: 'Fast | Precise | Automated',
     tagline: 'Trade Smarter',
     summary:
-      'A high-frequency Expert Advisor that works the short intraday swings on gold and the major pairs.',
+      'A high-frequency Expert Advisor built for one market: gold. Two engines work the intraday swings on XAUUSD, with a hard daily floor underneath them.',
     description: [
-      'TradeFx Scalper is built for traders who want to be in and out of the market quickly. It reads short-term momentum on XAUUSD and the major currency pairs, opens tightly-scoped positions and manages them to a defined target without manual input.',
-      'Every position carries a stop from the moment it is opened. Exposure limits, spread filters and a daily loss ceiling are enforced by the Expert Advisor itself, so a bad session closes the bot down rather than compounding.',
-      'Setup is a single licence code. Once your MT5 account is linked the Expert Advisor runs on our infrastructure — nothing to install, no VPS to keep alive, no terminal to leave running on your own machine.',
+      'TradeFx Scalper does one thing, which is trade gold. Rather than spreading attention across a watchlist it concentrates on XAUUSD and the way that market moves inside a session — sharp impulses, the shallow corrections that follow them, and levels that get revisited before the day is out.',
+      'Two engines run alongside each other. The first waits for a distinct directional impulse and enters on the correction behind it, then manages the position in real time. The second places pending orders at levels worked out ahead of the session and lets the market come to them. Either can run on its own, or both together — we settle that with you when the account is linked.',
+      'Underneath both sits a floor. Every position carries a stop from the moment it opens, and a protection layer watches equity through the day: a maximum loss in your account currency, a drawdown ceiling, a minimum equity level and a cap on open lots. Touch any of them and the Expert Advisor stops trading until the next day, so a bad session ends rather than compounds.',
+      'Setup is a single licence code. Once your MT5 account is linked the Expert Advisor runs on our infrastructure, tuned to your broker’s gold spread and server time — nothing to install, no VPS to keep alive, no terminal left running on your own machine.',
     ],
     highlights: ['High accuracy', 'Automated trading', 'Risk management', 'Easy setup'],
+    features: [
+      {
+        title: 'Two engines, one market',
+        body: 'An impulse engine that enters on the pullback after a strong directional move, and a level engine that rests pending orders at prices worked out ahead of the session. Run one, or both.',
+      },
+      {
+        title: 'A daily floor under the account',
+        body: 'A maximum loss for the day in your account currency, a drawdown ceiling as a percentage, a minimum equity level and a cap on total open lots. Reach any of them and trading halts until the next session.',
+      },
+      {
+        title: 'Exits that scale with volatility',
+        body: 'Targets and stops can be fixed, or derived from how much gold is actually moving — wider in fast conditions, tighter in quiet ones. Profit is locked in progressively as a trade runs your way.',
+      },
+      {
+        title: 'Stop levels held off the server',
+        body: 'Stops and targets can be held on our side rather than sent to the broker, so they are not sitting visible on the server. The exit is enforced the moment price reaches it.',
+      },
+      {
+        title: 'Sits out the news',
+        body: 'A calendar filter pauses new entries around high-impact releases, with medium-impact optional, and can be narrowed to the US payrolls and rate decisions that move gold hardest. You choose how long before and after to stand aside.',
+      },
+      {
+        title: 'Spread and slippage limits',
+        body: 'New entries are blocked above a spread threshold and fills outside a set tolerance are refused. A scalping edge disappears the moment the spread eats it, so it would rather not trade at all.',
+      },
+      {
+        title: 'Session and weekday control',
+        body: 'It can work around the clock Monday to Friday, or be held to the hours you want. Individual days and hours can be switched off, and a Friday rule closes everything out before the weekend gap.',
+      },
+      {
+        title: 'Sizing set against your account',
+        body: 'Either a fixed lot size, or a share of free margin so positions scale with the balance as it moves. We set the level with you against the account size rather than shipping one default.',
+      },
+    ],
     platform: 'MetaTrader 5',
-    tag: 'Scalping',
-    strategy: 'Intraday scalping',
-    markets: 'XAUUSD · FX majors',
+    tag: 'Gold scalping',
+    strategy: 'Intraday gold scalping',
+    markets: 'XAUUSD (gold)',
     accent: { chip: 'bg-amber-50 text-amber-800 ring-amber-200', glow: 'from-amber-200/40' },
     image: '/product-images/scalper.webp',
     cardImage: '/product-images/scalper-card.webp',
@@ -109,37 +147,48 @@ export const products: Product[] = [
     cardSize: { w: 440, h: 689 },
     imageSize: { w: 900, h: 1410 },
     compare: {
-      risk: 'Higher',
+      risk: 'Lower',
       frequency: 'Several trades a session',
       horizon: 'Intraday',
       accountType: 'Raw-spread / ECN, MT5',
-      bestFor: 'Traders who want activity and can sit through fast swings',
+      bestFor: 'Traders who want concentrated gold exposure and can sit through fast swings',
     },
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
-      'Guided setup for your MT4 or MT5 account',
+      'A stop loss and a take profit on every trade',
+      'Guided setup for your MT5 account',
+      'Settings tuned to your broker’s gold spread and server time',
       'Live dashboard with daily return and full trade statement',
       'CSV export of every trade',
       'Support over email and Telegram',
     ],
     requirements: [
-      'An MT5 account with a broker of your choice',
-      'A raw-spread or ECN account type — wide spreads erode scalping edges',
+      'An MT5 account whose broker quotes XAUUSD',
+      'A raw-spread or ECN account type — wide spreads erode a scalping edge',
+      'A broker whose gold spread holds up through the active sessions',
       'Sensible leverage; we will advise on the day',
     ],
     faqs: [
       {
+        q: 'Does it trade anything other than gold?',
+        a: 'No. Scalper is a single-instrument Expert Advisor and XAUUSD is the instrument. If you want activity spread across currencies, metals and indices, TradeFx Infinity is the one to look at.',
+      },
+      {
         q: 'How often does it trade?',
-        a: 'Scalper is the busiest of the range. On an active session it may open and close positions several times an hour; on a quiet one it can sit out entirely. It will not trade for the sake of it.',
+        a: 'It is the busiest of the range. On an active session it may open and close positions several times an hour; on a quiet one it can sit out entirely. The spread, news and session filters all exist to stop it trading for the sake of it.',
       },
       {
         q: 'Why MT5 rather than MT4?',
-        a: 'The execution and symbol handling it relies on are cleaner on MT5. An MT4 build is not currently offered.',
+        a: 'The execution and symbol handling a gold scalper depends on are cleaner on MT5, so that is the platform Scalper ships on. Send us the account you already have and we will confirm your broker quotes gold on terms that suit a scalper before anything is purchased.',
+      },
+      {
+        q: 'Does it increase position size after a loss?',
+        a: 'Only if you ask it to. There is a loss-recovery mode that steps size up after a losing trade, and it is switched off by default. It raises risk rather than reducing it, so we leave it off unless you request it and are clear about what it does.',
       },
       {
         q: 'What happens when spreads widen?',
-        a: 'It stops. A spread filter blocks new entries above a threshold, because a scalping edge disappears the moment the spread eats it.',
+        a: 'It stops. New entries are blocked above a spread threshold, because a scalping edge disappears the moment the spread eats it. Gold spreads widen around the daily rollover and through major releases, and it stands aside for both.',
       },
     ],
   },
@@ -178,6 +227,7 @@ export const products: Product[] = [
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
+      'A stop loss and a take profit on every trade',
       'Guided setup for your MT4 or MT5 account',
       'Live dashboard with daily return and full trade statement',
       'CSV export of every trade',
@@ -238,6 +288,7 @@ export const products: Product[] = [
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
+      'A stop loss and a take profit on every trade',
       'Guided setup for your MT4 or MT5 account',
       'Live dashboard with daily return and full trade statement',
       'CSV export of every trade',
@@ -298,6 +349,7 @@ export const products: Product[] = [
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
+      'A stop loss and a take profit on every trade',
       'Guided setup for your MT4 or MT5 account',
       'Live dashboard with daily return and full trade statement',
       'CSV export of every trade',
@@ -558,8 +610,8 @@ export const services: Service[] = [
         a: "It is recorded in the execution log and an alert is raised. That account is then out of step with the source, which is precisely why the alert exists rather than the failure being swallowed quietly.",
       },
       {
-        q: "Do I need regulatory permission to manage other people\u2019s accounts?",
-        a: "Very possibly, depending on where you and your clients are. Trading other people\u2019s money is a regulated activity in most jurisdictions. We supply software; we do not supply a licence, and you should take your own advice before taking on client funds.",
+        q: "Do I need regulatory permission to manage other people’s accounts?",
+        a: "Very possibly, depending on where you and your clients are. Trading other people’s money is a regulated activity in most jurisdictions. We supply software; we do not supply a licence, and you should take your own advice before taking on client funds.",
       },
     ],
     caveat: {
@@ -618,7 +670,7 @@ export const services: Service[] = [
     faqs: [
       {
         q: "Do you handle custody of funds?",
-        a: "We build the platform; we never hold your users\u2019 funds. Custody is architected with you and normally uses a provider you select and contract with directly.",
+        a: "We build the platform; we never hold your users’ funds. Custody is architected with you and normally uses a provider you select and contract with directly.",
       },
       {
         q: "Can you help with the licensing?",
