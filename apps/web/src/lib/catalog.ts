@@ -172,7 +172,7 @@ export const products: Product[] = [
     faqs: [
       {
         q: 'Does it trade anything other than gold?',
-        a: 'No. Scalper is a single-instrument Expert Advisor and XAUUSD is the instrument. If you want activity spread across currencies, metals and indices, TradeFx Infinity is the one to look at.',
+        a: 'No. Scalper is a single-instrument Expert Advisor and XAUUSD is the instrument. If you want currency pairs, Infinity works a fixed basket of four; if you want gold held for weeks rather than minutes, that is Investor.',
       },
       {
         q: 'How often does it trade?',
@@ -200,17 +200,48 @@ export const products: Product[] = [
     kicker: 'Automate | Analyze | Grow',
     tagline: 'Trade Without Limits',
     summary:
-      'Our multi-asset Expert Advisor, designed for consistent performance across currencies, metals and indices.',
+      'A currency Expert Advisor that works a fixed basket of four pairs, sizing them as one exposure rather than four separate bets.',
     description: [
-      'TradeFx Infinity is the generalist of the range. Rather than specialising in one instrument it spreads activity across currencies, metals and index CFDs, so a quiet stretch in one market does not leave the account idle.',
-      'The Expert Advisor sizes each position against the account balance and keeps total exposure inside a fixed ceiling. Correlated positions are counted together, which stops the familiar problem of holding what looks like four trades but is really one bet repeated.',
-      'Infinity is the right starting point if you want steady participation across a broad market rather than a single concentrated strategy.',
+      'TradeFx Infinity trades currencies — four pairs, chosen and kept: GBPUSD, NZDCAD, AUDCAD and AUDNZD. One major, and three crosses built from the Australian dollar, the New Zealand dollar and the Canadian dollar. The basket is narrow on purpose. The patterns it reads were developed on these four rather than pointed at whatever a broker happens to list.',
+      'Three of the four share a commodity currency, so they move together more often than a trade log makes it look. Infinity sizes them as one exposure rather than four independent positions, which heads off the familiar problem of holding what appears to be a diversified book and is really the same bet placed several times.',
+      'Three protection layers sit under the strategy: one guards the account balance, one caps how far equity may fall from its high, and one secures gains on a position once it has them. Each carries a number, and we set those numbers with you rather than shipping a default and hoping.',
+      'Infinity is the sensible place to start if this is your first Expert Advisor. Risk is expressed as a share of your balance rather than a lot size, so it can begin deliberately low while you watch how the thing behaves on your own account, and be raised later once you have seen it work.',
     ],
-    highlights: ['High accuracy', 'Fully automated', 'Risk management', 'Multi-asset support'],
+    highlights: ['High accuracy', 'Fully automated', 'Risk management', 'Multi-pair support'],
+    features: [
+      {
+        title: 'Four pairs, kept narrow',
+        body: 'GBPUSD, NZDCAD, AUDCAD and AUDNZD — a major and three commodity-currency crosses. A fixed basket rather than a scanner pointed at the broker’s whole symbol list.',
+      },
+      {
+        title: 'Correlation counted once',
+        body: 'Three of the four share a currency, so they rarely move independently. Exposure is measured across the basket rather than per trade, so a correlated cluster cannot quietly become one oversized position.',
+      },
+      {
+        title: 'Three protection layers',
+        body: 'One guards the account balance, one caps how far equity may fall from its high, and one secures gains on a position once it has them. Each has a number attached that we agree with you.',
+      },
+      {
+        title: 'Risk as a share of the balance',
+        body: 'Position size is a percentage of your account rather than a fixed lot, so it scales as the balance moves. At the low setting that is a fraction of one percent per position. We set yours, and it can be changed later.',
+      },
+      {
+        title: 'Stands aside for high-impact news',
+        body: 'A calendar filter pauses new entries around major releases. An open position can sit through a number; opening a fresh one into the minutes either side of it is a different matter.',
+      },
+      {
+        title: 'Patterns rather than one signal line',
+        body: 'Entries come from repeatable price-action structure rather than a single indicator crossing another, which is what lets one set of logic work across four different pairs.',
+      },
+      {
+        title: 'Micro accounts included',
+        body: 'Micro, mini and standard accounts all work. Because risk is set as a percentage rather than a lot size, a smaller balance simply trades smaller rather than trading badly.',
+      },
+    ],
     platform: 'MetaTrader 4 · MetaTrader 5',
-    tag: 'Multi-asset',
-    strategy: 'Multi-asset trend and momentum',
-    markets: 'FX · Metals · Indices',
+    tag: 'Multi-pair',
+    strategy: 'Price-action patterns across four pairs',
+    markets: 'GBPUSD · NZDCAD · AUDCAD · AUDNZD',
     accent: { chip: 'bg-orange-50 text-orange-800 ring-orange-200', glow: 'from-orange-200/40' },
     image: '/product-images/infinity.webp',
     cardImage: '/product-images/infinity-card.webp',
@@ -219,10 +250,10 @@ export const products: Product[] = [
     imageSize: { w: 900, h: 1366 },
     compare: {
       risk: 'Moderate',
-      frequency: 'A few trades a day',
+      frequency: 'Pattern-led, across four pairs',
       horizon: 'Days to weeks',
-      accountType: 'Standard MT4 or MT5',
-      bestFor: 'A first Expert Advisor, spread across many markets',
+      accountType: 'Standard MT4 or MT5, micro included',
+      bestFor: 'A first Expert Advisor, with risk set low to begin',
     },
     included: [
       'One 9-character licence code',
@@ -234,22 +265,31 @@ export const products: Product[] = [
       'Support over email and Telegram',
     ],
     requirements: [
-      'An MT4 or MT5 account',
-      'A broker offering FX, metals and index CFDs',
+      'An MT4 or MT5 account quoting GBPUSD, NZDCAD, AUDCAD and AUDNZD',
+      'A broker that lists the AUD, NZD and CAD crosses — not every one does',
+      'Micro, mini or standard all work; risk is a percentage, not a fixed lot',
       'Enough balance to hold several positions at once',
     ],
     faqs: [
       {
-        q: 'How many markets does it trade?',
-        a: 'It spreads activity across currencies, metals and index CFDs rather than concentrating on one instrument, so a quiet stretch in one market does not leave the account idle.',
+        q: 'Which pairs does it trade?',
+        a: 'GBPUSD, NZDCAD, AUDCAD and AUDNZD — a major and three commodity-currency crosses. The basket is fixed rather than scanned, because the patterns it reads were developed on those four specifically.',
       },
       {
-        q: 'Can I restrict it to certain symbols?',
-        a: 'Yes. Tell us which instruments you want in or out when you set up, and we apply the filter to your account.',
+        q: 'Why not metals or indices?',
+        a: 'Because it is a currency system, and we would rather say so than imply a reach it does not have. If you want gold, Scalper works it intraday and Investor holds it. Infinity is the currency one.',
+      },
+      {
+        q: 'Can I restrict it to certain pairs?',
+        a: 'Yes. Tell us which of the four you want in or out at setup and we apply it to your account. Bear in mind the three crosses overlap, so dropping one shifts the balance of exposure more than it appears to.',
+      },
+      {
+        q: 'Is this a sensible first Expert Advisor?',
+        a: 'It is the one we usually suggest. Risk is a percentage rather than a lot size, so it can start deliberately low while you watch how an Expert Advisor behaves on your own money, then be raised once you have seen enough.',
       },
       {
         q: 'Does it hold positions overnight?',
-        a: 'It can. Positions are held as long as the setup holds, so expect swap charges on longer holds.',
+        a: 'It can. Positions are held as long as the pattern holds, so expect swap charges on longer holds — and on the crosses those can run in your favour or against you depending on the rate differential.',
       },
     ],
   },
@@ -261,17 +301,48 @@ export const products: Product[] = [
     kicker: 'Invest | Compound | Grow',
     tagline: 'Long Term. Real Results.',
     summary:
-      'A low-intensity Expert Advisor for capital you intend to leave alone — built around stability and compounding.',
+      'A long-horizon Expert Advisor for gold. It buys weakness and strength alike, then holds the position and compounds rather than working it intraday.',
     description: [
-      'TradeFx Investor trades far less often than the rest of the range, and that is the point. It targets a small number of higher-conviction positions and holds them, aiming to compound steadily rather than to post a busy trade log.',
-      'Position sizes stay conservative and scale with the account as it grows, so the risk taken on each trade stays proportionate instead of drifting upward after a good run.',
-      'This is the Expert Advisor to look at if your horizon is measured in quarters rather than sessions, and drawdown matters more to you than trade count.',
+      'TradeFx Investor trades gold, and it trades it slowly. Where Scalper works XAUUSD inside the session and is flat by the close, Investor takes a position in the same instrument and holds it. The horizon is weeks and months, and the aim is to compound quietly rather than to post a busy trade log.',
+      'It has three ways into the market and chooses between them by condition: buying into a pullback, buying into a strong impulse that is still running, and riding a trend once one is clearly established. All three are the same instrument seen at different moments, which is why a single Expert Advisor can hold them together without contradicting itself.',
+      'The exit logic is the half that matters on a long hold. It combines taking profit with protecting it — securing gains as a position matures, and reducing exposure when conditions turn rather than leaving an open trade to drift while the account waits for a target that is no longer coming.',
+      'Underneath sits a drawdown layer strict enough for funded and prop-firm accounts: a ceiling on how far equity may fall from its high and a floor it may not cross, with sizing set either as a fixed lot or as a share of the balance. Setup is a single licence code — once your MT4 or MT5 account is linked the Expert Advisor runs on our infrastructure, with nothing to install and no VPS to keep alive.',
     ],
     highlights: ['Low-risk strategies', 'Automated investing', 'Portfolio management', 'Long-term growth'],
+    features: [
+      {
+        title: 'Three ways into one market',
+        body: 'It buys into a pullback, buys into a strong impulse still running, and rides an established trend. Same instrument, different conditions — it picks between them instead of forcing one approach on every session.',
+      },
+      {
+        title: 'Exits that protect, not just target',
+        body: 'Gains are secured as a position matures and exposure is cut when conditions turn. On a hold measured in weeks, getting out well matters more than getting in perfectly.',
+      },
+      {
+        title: 'Drawdown limits a prop firm would recognise',
+        body: 'A ceiling on how far equity may fall from its high, and a floor it may not cross. These are the controls funded-account rules are written around, and the Expert Advisor enforces them rather than leaving you to watch.',
+      },
+      {
+        title: 'Fixed lots, or a share of the balance',
+        body: 'Either a lot size that stays where you put it, or sizing that scales with the account so risk per position stays proportionate instead of drifting upward after a good run.',
+      },
+      {
+        title: 'Stands aside for the calendar',
+        body: 'A news filter pauses new entries around high-impact releases. A position already held can sit through a number; opening a fresh one into it is a different decision.',
+      },
+      {
+        title: 'Your broker, measured rather than assumed',
+        body: 'Spread, slippage and how fills actually behave on your own account are measured, so if the broker is what is costing you, it shows up as data rather than a hunch.',
+      },
+      {
+        title: 'No two accounts place the identical order',
+        body: 'Entries can be varied slightly between accounts, so running it on more than one does not fire the same order into the market at the same instant. It matters if you trade several accounts, or a funded one.',
+      },
+    ],
     platform: 'MetaTrader 4 · MetaTrader 5',
     tag: 'Long term',
-    strategy: 'Position trading and compounding',
-    markets: 'FX majors · Metals',
+    strategy: 'Long-horizon gold accumulation',
+    markets: 'XAUUSD (gold)',
     accent: { chip: 'bg-yellow-50 text-yellow-800 ring-yellow-200', glow: 'from-yellow-200/40' },
     image: '/product-images/investor.webp',
     cardImage: '/product-images/investor-card.webp',
@@ -280,37 +351,47 @@ export const products: Product[] = [
     imageSize: { w: 900, h: 1360 },
     compare: {
       risk: 'Lower',
-      frequency: 'A handful a month',
-      horizon: 'Months to quarters',
+      frequency: 'Selective; quiet stretches are normal',
+      horizon: 'Weeks to quarters',
       accountType: 'Standard MT4 or MT5',
-      bestFor: 'Capital you intend to leave alone and compound',
+      bestFor: 'Gold you intend to hold and compound, funded accounts included',
     },
     included: [
       'One 9-character licence code',
       'Managed execution on our infrastructure',
       'A stop loss and a take profit on every trade',
       'Guided setup for your MT4 or MT5 account',
+      'Drawdown ceilings set to your account, or to your prop firm’s rules',
       'Live dashboard with daily return and full trade statement',
       'CSV export of every trade',
       'Support over email and Telegram',
     ],
     requirements: [
-      'An MT4 or MT5 account',
+      'An MT4 or MT5 account whose broker quotes XAUUSD',
       'A horizon measured in months rather than sessions',
       'Capital you can leave in place while it compounds',
+      'Margin headroom, since positions are held rather than closed out each session',
     ],
     faqs: [
       {
-        q: 'Why so few trades?',
-        a: 'That is the design. Investor waits for higher-conviction setups and holds them, aiming to compound steadily rather than post a busy trade log.',
+        q: 'Both Scalper and Investor trade gold — what is the difference?',
+        a: 'Horizon, and everything that follows from it. Scalper is in and out inside the session, several times on an active day, and needs a raw-spread account for the arithmetic to work. Investor takes a position in the same instrument and holds it for weeks. Same market, opposite temperament.',
+      },
+      {
+        q: 'Does it trade anything other than gold?',
+        a: 'No. XAUUSD is the instrument. If you want currency pairs, Infinity works a fixed basket of four.',
+      },
+      {
+        q: 'Can I run it on a funded or prop-firm account?',
+        a: 'The drawdown controls were built for it, and can be set to whatever ceiling the firm imposes. Check the firm permits automated trading first — most do, some do not, and that rule is theirs rather than ours.',
       },
       {
         q: 'Does position size grow with the account?',
-        a: 'Yes. Sizing scales with balance, so risk per trade stays proportionate instead of drifting upward after a good run.',
+        a: 'If you want it to. Sizing can scale with balance so risk per position stays proportionate instead of drifting upward after a good run, or stay at a fixed lot if you would rather it did not move at all.',
       },
       {
         q: 'Can I withdraw while it is running?',
-        a: 'Whenever you like — it is your broker account. Position sizes adjust to the new balance automatically.',
+        a: 'Whenever you like — it is your broker account. Sizing adjusts to the new balance, though do leave enough margin behind for the positions already open.',
       },
     ],
   },

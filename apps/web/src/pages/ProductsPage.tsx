@@ -18,7 +18,7 @@ export default function ProductsPage() {
     title: 'Forex Expert Advisors for MT4 and MT5',
     path: '/products',
     description:
-      'Compare the four TradeFx Expert Advisors — Scalper for gold, Infinity for multi-asset, Investor for the long term and Heddge for two-sided hedging. Managed execution, no VPS required.',
+      'Compare the four TradeFx Expert Advisors — Scalper for gold intraday, Infinity for a four-pair currency basket, Investor for gold held long, and Heddge for two-sided hedging. Managed execution, no VPS required.',
     jsonLd: [
       itemListSchema(products.map((p) => ({ name: p.name, path: `/products/${p.slug}` }))),
       breadcrumbSchema([

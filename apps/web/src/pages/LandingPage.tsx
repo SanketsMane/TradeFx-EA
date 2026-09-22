@@ -35,7 +35,7 @@ export default function LandingPage() {
   useSeo({
     path: '/',
     description:
-      'Four Expert Advisors for MetaTrader — scalping, multi-asset, long-term and hedged. Link your own MT4 or MT5 broker account, enter a licence code, and let the bot trade.',
+      'Four Expert Advisors for MetaTrader — scalping, multi-pair, long-term and hedged. Link your own MT4 or MT5 broker account, enter a licence code, and let the bot trade.',
     jsonLd: [
       organizationSchema(),
       websiteSchema(),
@@ -68,7 +68,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
-              Four Expert Advisors for MetaTrader — scalping, multi-asset, long-term and hedged.
+              Four Expert Advisors for MetaTrader — scalping, multi-pair, long-term and hedged.
               Link your own broker account, enter a licence code, and let the bot trade while you
               get on with your day.
             </p>

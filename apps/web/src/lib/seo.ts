@@ -10,7 +10,7 @@ export const SITE = {
   origin: 'https://tradefx.in',
   tagline: 'Forex Expert Advisors',
   description:
-    'TradeFx builds Expert Advisors for MetaTrader — scalping, multi-asset, long-term and hedged. Link your own broker account and let the bot trade.',
+    'TradeFx builds Expert Advisors for MetaTrader — scalping, multi-pair, long-term and hedged. Link your own broker account and let the bot trade.',
   logo: 'https://tradefx.in/logo.png',
   telegram: 'https://t.me/TradeFx7170',
 } as const;

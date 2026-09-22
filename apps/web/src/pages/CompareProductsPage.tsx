@@ -27,7 +27,7 @@ const ROWS: { label: string; get: (p: (typeof products)[number]) => string }[] =
 const FAQS = [
   {
     q: 'Which TradeFx Expert Advisor should I start with?',
-    a: 'Infinity, in most cases. It spreads activity across currencies, metals and indices, so your results are not tied to one instrument while you get used to how an Expert Advisor behaves on your account.',
+    a: 'Infinity, in most cases. It works a fixed basket of four currency pairs and sets risk as a share of your balance rather than a lot size, so it can start deliberately low while you get used to how an Expert Advisor behaves on your own account.',
   },
   {
     q: 'Can I run more than one Expert Advisor at the same time?',
@@ -211,21 +211,21 @@ export default function CompareProductsPage() {
           <div className="mt-6 space-y-5 text-base leading-relaxed text-gray-700">
             <p>
               <strong className="text-gray-900">Start with Infinity</strong> if this is your first
-              Expert Advisor. It spreads activity across currencies, metals and index CFDs, so a
-              quiet stretch in one market does not leave the account idle and your early impression
-              is not formed by one instrument having a bad month.
+              Expert Advisor. It works four currency pairs rather than one instrument, and risk is
+              set as a share of your balance rather than a lot size — so it can begin deliberately
+              low while you watch how an Expert Advisor behaves on your own account.
             </p>
             <p>
               <strong className="text-gray-900">Choose Scalper</strong> if you want the account
-              working intraday and you are comfortable with a busy trade log. It concentrates on
-              gold and the major pairs, and it needs a raw-spread or ECN account — on a wide-spread
-              account the edge disappears into the spread.
+              working intraday and you are comfortable with a busy trade log. It trades gold and
+              nothing else, and it needs a raw-spread or ECN account — on a wide-spread account the
+              edge disappears into the spread.
             </p>
             <p>
               <strong className="text-gray-900">Choose Investor</strong> if the money is capital you
-              intend to leave alone. It trades far less often by design, holding a small number of
-              higher-conviction positions and letting them compound. If you will be checking the
-              account daily and want to see activity, this is the wrong one.
+              intend to leave alone. It trades the same instrument as Scalper — gold — but holds
+              positions for weeks instead of minutes and lets them compound. If you will be checking
+              the account daily and want to see activity, this is the wrong one.
             </p>
             <p>
               <strong className="text-gray-900">Choose Heddge</strong> if protecting capital through
