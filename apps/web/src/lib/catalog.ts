@@ -147,7 +147,7 @@ export const products: Product[] = [
     cardSize: { w: 440, h: 689 },
     imageSize: { w: 900, h: 1410 },
     compare: {
-      risk: 'Lower',
+      risk: 'Higher',
       frequency: 'Several trades a session',
       horizon: 'Intraday',
       accountType: 'Raw-spread / ECN, MT5',
