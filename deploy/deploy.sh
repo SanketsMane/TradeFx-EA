@@ -67,6 +67,12 @@ else
   exit 1
 fi
 
+# Push the URL list to Bing, Yandex, Seznam and Naver. Google does not
+# participate in IndexNow; its discovery still depends on Search Console
+# and inbound links. A failed submission must never fail a deploy.
+echo "==> Notifying IndexNow"
+pnpm --filter @tcp/web indexnow || echo "    (IndexNow submission failed — deploy continues)"
+
 echo "==> Health"
 sleep 4
 curl -fsS -m 10 http://127.0.0.1:3200/api/v1/health && echo

@@ -1,0 +1,36 @@
+# TradeFx
+
+> Forex Expert Advisors for MetaTrader 4 and 5. Customers license an Expert
+> Advisor, connect their own broker account, and the strategy runs on TradeFx
+> infrastructure — there is no VPS to maintain. Pricing is quoted per trading
+> account; no prices are published.
+
+TradeFx supplies trading software. It does not hold customer funds, manage
+money, or give investment advice. Trading foreign exchange on margin carries a
+high level of risk and can result in the loss of more than the deposit.
+
+## Expert Advisors
+- [TradeFx Scalper](https://tradefx.in/products/scalper)
+- [TradeFx Infinity](https://tradefx.in/products/infinity)
+- [TradeFx Investor](https://tradefx.in/products/investor)
+- [TradeFx Heddge](https://tradefx.in/products/heddge)
+- [Compare all four](https://tradefx.in/products/compare)
+
+## Guides
+- [How to connect an Expert Advisor to your MT5 account](https://tradefx.in/guides/connect-ea-to-mt5)
+- [Running a forex Expert Advisor without a VPS](https://tradefx.in/guides/forex-ea-without-vps)
+- [Gold scalping EAs for MT5: what actually matters](https://tradefx.in/guides/gold-scalping-ea-mt5)
+- [Hedging EAs for MT5: how two-sided strategies work](https://tradefx.in/guides/hedging-ea-mt5)
+
+## Services
+- [Forex Expert Advisor Development](https://tradefx.in/services/ea-development)
+- [Forex Trading VPS](https://tradefx.in/services/trading-vps)
+- [Multi-Account Execution System](https://tradefx.in/services/multi-account-execution)
+- [Crypto P2P Platforms](https://tradefx.in/services/crypto-p2p)
+- [Custom Trading Development](https://tradefx.in/services/custom-development)
+
+## About
+- [How it works](https://tradefx.in/how-it-works)
+- [Supported brokers](https://tradefx.in/supported-brokers)
+- [Request a quotation](https://tradefx.in/quote)
+- [Contact](https://tradefx.in/contact)

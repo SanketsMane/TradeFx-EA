@@ -9,3 +9,5 @@ Disallow: /reset-password
 Disallow: /forgot-password
 
 Sitemap: https://tradefx.in/sitemap.xml
+
+# IndexNow key file lives at the site root; see scripts/indexnow.mjs.
